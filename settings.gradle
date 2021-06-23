@@ -1,0 +1,2 @@
+rootProject.name = "TenQ"
+include ':app'

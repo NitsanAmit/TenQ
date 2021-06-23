@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TenQ</string>
+    <string name="com_spotify_sdk_redirect_scheme">compostpctenq</string>
+    <string name="com_spotify_sdk_redirect_host">spotifycallback</string>
+    <string name="code">Code: %1$s</string>
+    <string name="token">Access Token: %1$s</string>
+</resources>
