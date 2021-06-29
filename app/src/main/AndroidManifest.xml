@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.postpc.tenq">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <queries>
+        <package android:name="com.spotify.music" />
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -10,9 +15,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TenQ">
-
-        <activity android:name=".MainActivity">
-
+        <activity android:name=".activities.SongSearchActivity"/>
+        <activity android:name=".activities.RoomSettingsActivity" />
+        <activity android:name=".activities.RoomActivity" />
+        <activity android:name=".activities.JoinQrActivity" />
+        <activity android:name=".activities.JoinLinkActivity" />
+        <activity android:name=".activities.ExistingRoomsActivity" />
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,28 +29,29 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:exported="true"
-            android:name="com.spotify.sdk.android.authentication.AuthCallbackActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
+        <!-- SPOTIFY'S ACTIVITIES -->
+        <activity
+            android:name="com.spotify.sdk.android.authentication.AuthCallbackActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
-                    android:scheme="@string/com_spotify_sdk_redirect_scheme"
-                    android:host="@string/com_spotify_sdk_redirect_host"/>
+                    android:host="@string/com_spotify_sdk_redirect_host"
+                    android:scheme="@string/com_spotify_sdk_redirect_scheme" />
             </intent-filter>
         </activity>
-
         <activity
             android:name="com.spotify.sdk.android.authentication.LoginActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-        </activity>
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <!-- SPOTIFY'S ACTIVITIES -->
+
 
     </application>
-    <queries>
-        <package android:name="com.spotify.music" />
-    </queries>
+
 </manifest>
