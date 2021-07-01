@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "730289765910",
+    "project_id": "tenq-70fac",
+    "storage_bucket": "tenq-70fac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730289765910:android:56e9d4938f2abd6e2bff37",
+        "android_client_info": {
+          "package_name": "com.postpc.tenq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730289765910-mhaovk5qbrvlde9sg6nqkoc8jqbt4ie9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUePGq5LWK7H_5dtqDmkD12gUb8MkqcVI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "730289765910-mhaovk5qbrvlde9sg6nqkoc8jqbt4ie9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
