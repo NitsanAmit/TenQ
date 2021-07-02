@@ -13,8 +13,7 @@ public class SpotifyClient {
 
     private static SpotifyApiService spotifyApiService;
 
-    static SpotifyApiService getClient(String token) {
-        if (spotifyApiService != null) return spotifyApiService;
+    public static void init(String token) {
         HttpLoggingInterceptor logger = new HttpLoggingInterceptor();
         logger.setLevel(HttpLoggingInterceptor.Level.BODY);
 
@@ -36,7 +35,10 @@ public class SpotifyClient {
                 .build();
 
         spotifyApiService = retrofit.create(SpotifyApiService.class);
-        return spotifyApiService;
     }
 
+    public static SpotifyApiService getClient() throws SpotifyClientNotInitializedException {
+        if (spotifyApiService == null) throw new SpotifyClientNotInitializedException();
+        return spotifyApiService;
+    }
 }
