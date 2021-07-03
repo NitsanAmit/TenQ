@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
-import com.postpc.tenq.models.UserProfile;
+import com.postpc.tenq.models.User;
 
 public class AuthService implements IAuthService {
 
@@ -14,7 +14,7 @@ public class AuthService implements IAuthService {
     private static final String USER_KEY = "user";
     private final Context applicationContext;
     private final Gson gson;
-    private UserProfile currentUser;
+    private User currentUser;
 
     public AuthService(Context applicationContext) {
         this.applicationContext = applicationContext;
@@ -23,7 +23,7 @@ public class AuthService implements IAuthService {
 
     @Override
     @Nullable
-    public UserProfile getCurrentUser() {
+    public User getCurrentUser() {
         if (currentUser != null) return currentUser;
         return getUserFromSharedPreferences();
     }
@@ -32,12 +32,12 @@ public class AuthService implements IAuthService {
     @Nullable
     public String getCurrentUserId() {
         if (currentUser != null) return currentUser.getId();
-        UserProfile user = getUserFromSharedPreferences();
+        User user = getUserFromSharedPreferences();
         return user != null ? user.getId() : null;
     }
 
     @Override
-    public void saveCurrentUser(UserProfile user) {
+    public void saveCurrentUser(User user) {
         this.currentUser = user;
         SharedPreferences prefs = getAuthServicePreferences();
         prefs.edit().putString(USER_KEY, gson.toJson(user)).apply();
@@ -51,9 +51,9 @@ public class AuthService implements IAuthService {
     }
 
     @Nullable
-    private UserProfile getUserFromSharedPreferences() {
+    private User getUserFromSharedPreferences() {
         SharedPreferences prefs = getAuthServicePreferences();
-        UserProfile prefsUser = gson.fromJson(prefs.getString(USER_KEY, null), UserProfile.class);
+        User prefsUser = gson.fromJson(prefs.getString(USER_KEY, null), User.class);
         if (prefsUser != null) {
             this.currentUser = prefsUser;
         }

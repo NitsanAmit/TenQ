@@ -8,7 +8,7 @@ import android.util.Log;
 
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
-import com.postpc.tenq.models.UserProfile;
+import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
@@ -81,11 +81,11 @@ public class MainActivity extends TenQActivity {
         SpotifyClient
                 .getClient()
                 .getUserProfile()
-                .enqueue(new Callback<UserProfile>() {
+                .enqueue(new Callback<User>() {
                     @Override
-                    public void onResponse(@NotNull Call<UserProfile> call, @NotNull Response<UserProfile> response) {
+                    public void onResponse(@NotNull Call<User> call, @NotNull Response<User> response) {
                         if (response.code() == 200) {
-                            UserProfile profile = response.body();
+                            User profile = response.body();
                             if (profile == null) return; //TODO error
                             Log.d("LoginActivity", "Got profile!\n" + profile.toString());
                             MainActivity.this.getAuthService().saveCurrentUser(profile);
@@ -94,7 +94,7 @@ public class MainActivity extends TenQActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<UserProfile> call, Throwable error) {
+                    public void onFailure(Call<User> call, Throwable error) {
                         Log.e("LoginActivity", "Profile failure: ", error);
                     }
                 });

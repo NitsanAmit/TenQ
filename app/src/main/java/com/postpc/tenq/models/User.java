@@ -1,7 +1,5 @@
 package com.postpc.tenq.models;
 
-import android.util.ArraySet;
-
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
@@ -9,17 +7,9 @@ import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
-public class UserProfile implements Serializable {
-
-    @SerializedName("id")
-    String id;
-
-    @SerializedName("display_name")
-    String username;
+public class User extends SpotifyEntity implements Serializable {
 
     @SerializedName("email")
     String email;
@@ -28,7 +18,7 @@ public class UserProfile implements Serializable {
     String profileLink;
 
     @SerializedName("images")
-    UserImage[] images;
+    SpotifyImage[] images;
 
     public String getId() {
         return id;
@@ -40,7 +30,7 @@ public class UserProfile implements Serializable {
     public String toString() {
         return "User Details:" +
                 "\nid: " + id +
-                "\nusername: " + username +
+                "\nusername: " + name +
                 "\nemail: " + email +
                 "\nprofileLink: " + profileLink +
                 "\nimages: " + String.join(",", Arrays.stream(images).map(image -> image.url).toArray(String[]::new));
