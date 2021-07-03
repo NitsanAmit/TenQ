@@ -5,4 +5,5 @@
     <string name="code">Code: %1$s</string>
     <string name="token">Access Token: %1$s</string>
     <string name="aria_logo">TenQ Logo</string>
+    <string name="aria_room_indicator">Room Indicator</string>
 </resources>

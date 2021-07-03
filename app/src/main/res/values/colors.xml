@@ -11,4 +11,5 @@
     <color name="primary_dark">#b61827</color>
     <color name="secondary">#4db6ac</color>
     <color name="secondary_dark">#00867d</color>
+    <color name="indicator_good">#9CCC65</color>
 </resources>
