@@ -15,7 +15,7 @@ public class Room implements Serializable {
     @SerializedName("guests")
     User[] guests;
 
-    @SerializedName("playlist_id")
+    @SerializedName("playlist")
     Playlist playlist;
 
 }
