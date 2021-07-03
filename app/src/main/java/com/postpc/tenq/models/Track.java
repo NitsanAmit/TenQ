@@ -13,9 +13,9 @@ public class Track extends SpotifyEntity implements Serializable {
     int durationMs;
 
     @SerializedName("artists")
-    int artists;
+    Artist[] artists;
 
     @SerializedName("album")
-    int album;
+    Album album;
 
 }
