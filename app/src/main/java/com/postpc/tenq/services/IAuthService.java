@@ -1,14 +1,14 @@
 package com.postpc.tenq.services;
 
-import com.postpc.tenq.models.UserProfile;
+import com.postpc.tenq.models.User;
 
 public interface IAuthService {
 
-    UserProfile getCurrentUser();
+    User getCurrentUser();
 
     String getCurrentUserId();
 
-    void saveCurrentUser(UserProfile user);
+    void saveCurrentUser(User user);
 
     void removeCurrentUser();
 
