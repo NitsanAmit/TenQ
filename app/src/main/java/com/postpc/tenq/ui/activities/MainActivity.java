@@ -32,6 +32,8 @@ public class MainActivity extends TenQActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        startRoomsActivity();
+
         if (getAuthService().getCurrentUserId() == null) {
             startSpotifyAuthFlow();
         } else {
@@ -41,6 +43,8 @@ public class MainActivity extends TenQActivity {
 
     private void startRoomsActivity() {
         startActivity(new Intent(this, ExistingRoomsActivity.class));
+        // todo - change this to RoomActivity.calss - only for check JoinQrActivity
+        startActivity(new Intent(this, JoinQrActivity.class));
     }
 
     private void startSpotifyAuthFlow() {
