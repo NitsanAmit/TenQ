@@ -1,4 +1,4 @@
-package com.postpc.tenq.activities;
+package com.postpc.tenq.ui.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,6 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.postpc.tenq.network.SpotifyClient.AUTHORIZATION_SCOPES;
 import static com.postpc.tenq.network.SpotifyClient.CLIENT_ID;
 
 public class MainActivity extends TenQActivity {
@@ -39,7 +40,7 @@ public class MainActivity extends TenQActivity {
     }
 
     private void startRoomsActivity() {
-        startActivity(new Intent(this, RoomActivity.class));
+        startActivity(new Intent(this, ExistingRoomsActivity.class));
     }
 
     private void startSpotifyAuthFlow() {
@@ -57,7 +58,7 @@ public class MainActivity extends TenQActivity {
     private AuthorizationRequest getAuthenticationRequest() {
         return new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, getRedirectUri().toString())
                 .setShowDialog(false)
-                .setScopes(new String[]{"user-read-email"})
+                .setScopes(AUTHORIZATION_SCOPES)
                 .build();
     }
 

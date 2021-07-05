@@ -1,16 +1,14 @@
-package com.postpc.tenq.activities;
+package com.postpc.tenq.ui.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
 import com.postpc.tenq.R;
 
-public class RoomSettingsActivity extends AppCompatActivity {
+public class JoinLinkActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_room_settings);
+        setContentView(R.layout.activity_join_link);
     }
 }

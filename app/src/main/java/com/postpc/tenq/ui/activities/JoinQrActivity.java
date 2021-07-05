@@ -1,4 +1,4 @@
-package com.postpc.tenq.activities;
+package com.postpc.tenq.ui.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import com.postpc.tenq.R;
