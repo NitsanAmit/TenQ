@@ -56,7 +56,6 @@
         android:src="@drawable/ic_like_empty" />
 
     <ImageView
-        android:id="@+id/icon_reorder"
         style="@style/system_icon"
         android:src="@drawable/ic_reorder" />
 

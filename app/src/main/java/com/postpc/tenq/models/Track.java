@@ -25,4 +25,25 @@ public class Track extends SpotifyEntity implements Serializable {
     @SerializedName("added_at")
     Date addedAt;
 
+    boolean inUserLibrary;
+
+    public Artist[] getArtists() {
+        return artists;
+    }
+
+    public Album getAlbum() {
+        return album;
+    }
+
+    public User getAddedBy() {
+        return addedBy;
+    }
+
+    public Date getAddedAt() {
+        return addedAt;
+    }
+
+    public boolean isInUserLibrary() {
+        return inUserLibrary;
+    }
 }

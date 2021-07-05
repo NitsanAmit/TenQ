@@ -3,6 +3,7 @@ package com.postpc.tenq.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class TracksPage implements Serializable {
 
@@ -25,6 +26,9 @@ public class TracksPage implements Serializable {
     String previous;
 
     @SerializedName("items")
-    Track[] items;
+    List<Track> items;
 
+    public List<Track> getItems() {
+        return items;
+    }
 }
