@@ -18,11 +18,11 @@
         android:theme="@style/Theme.TenQ">
         <activity android:name=".ui.activities.SongSearchActivity" />
         <activity android:name=".ui.activities.RoomSettingsActivity" />
-        <activity android:name=".ui.activities.RoomActivity"
-        android:label="Existing Rooms"/>
+        <activity android:name=".ui.activities.RoomActivity" />
         <activity android:name=".ui.activities.JoinQrActivity" />
         <activity android:name=".ui.activities.JoinLinkActivity" />
-        <activity android:name=".ui.activities.ExistingRoomsActivity" />
+        <activity android:name=".ui.activities.ExistingRoomsActivity"
+            android:label="Existing Rooms"/>
         <activity android:name=".ui.activities.MainActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>

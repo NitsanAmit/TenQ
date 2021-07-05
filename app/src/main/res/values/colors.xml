@@ -12,4 +12,5 @@
     <color name="secondary">#4db6ac</color>
     <color name="secondary_dark">#00867d</color>
     <color name="indicator_good">#9CCC65</color>
+    <color name="dark_gray">#686868</color>
 </resources>

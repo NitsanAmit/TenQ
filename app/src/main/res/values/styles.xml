@@ -27,4 +27,10 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:padding">8dp</item>
     </style>
+
+    <style name="text_link">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/text_link</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
 </resources>

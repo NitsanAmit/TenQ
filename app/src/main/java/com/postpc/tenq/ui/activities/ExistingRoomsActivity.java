@@ -1,15 +1,21 @@
 package com.postpc.tenq.ui.activities;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
+import com.postpc.tenq.databinding.ActivityExistingRoomsBinding;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.ui.adapters.ExistingRoomsAdapter;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
@@ -19,29 +25,54 @@ import java.util.List;
 
 public class ExistingRoomsActivity extends TenQActivity {
 
+    ActivityExistingRoomsBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_existing_rooms);
+        binding = ActivityExistingRoomsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        getUserExistingRooms();
 
+        binding.fabCreateRoom.setOnClickListener(v -> {
+            View view = getLayoutInflater().inflate(R.layout.dialog_create_room, null);
+            AlertDialog alertDialog = new AlertDialog.Builder(this)
+                    .setView(view)
+                    .create();
+            alertDialog.show();
+            view.findViewById(R.id.txt_cancel).setOnClickListener(cancel -> alertDialog.dismiss());
+            view.findViewById(R.id.txt_create_room).setOnClickListener(createRoom -> {
+                TextInputEditText editText = (TextInputEditText) view.findViewById(R.id.input_room_name);
+                if (TextUtils.isEmpty(editText.getText())) {
+                    editText.setError("Can't be empty");
+                } else {
+                    Intent intent = new Intent(this, RoomActivity.class);
+                    intent.putExtra("room_name", editText.getText().toString());
+                    startActivity(intent);
+                    alertDialog.dismiss();
+                }
+            });
+        });
+        binding.fabJoinWithId.setOnClickListener(v -> startActivity(new Intent(this, JoinLinkActivity.class)));
+        binding.fabScanQr.setOnClickListener(v -> startActivity(new Intent(this, JoinQrActivity.class)));
+    }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("users")
+    private void getUserExistingRooms() {
+        FirebaseFirestore.getInstance()
+                .collection("users")
                 .document(getAuthService().getCurrentUserId())
                 .addSnapshotListener((value, error) -> {
                     if (value == null) {
                         Log.d("ExistingRoomsActivity", "no rooms found.", error);
                         return;
                     }
-                    getRooms((List<String>) value.get("roomIds"));
-                    Log.d("ExistingRoomsActivity", "User rooms found: " + value.toString());
+                    getRoomsDetails((List<String>) value.get("roomIds"));
                 });
-
     }
 
-    private void getRooms(List<String> roomIds) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("rooms")
+    private void getRoomsDetails(List<String> roomIds) {
+        FirebaseFirestore.getInstance()
+                .collection("rooms")
                 .whereIn("id", roomIds)
                 .addSnapshotListener((value, error) -> {
                     if (value == null) {
@@ -53,8 +84,7 @@ public class ExistingRoomsActivity extends TenQActivity {
     }
 
     private void initRecyclerViewWithExistingRooms(List<Room> rooms) {
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_existing_rooms);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerExistingRooms.setLayoutManager(new LinearLayoutManager(this));
         IRoomActionListener listener = new IRoomActionListener(){ //TODO implement
             @Override
             public void onRoomExport(Room room) {
@@ -72,6 +102,6 @@ public class ExistingRoomsActivity extends TenQActivity {
             }
         };
         ExistingRoomsAdapter adapter = new ExistingRoomsAdapter(rooms != null ? rooms : new ArrayList<>(), listener);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerExistingRooms.setAdapter(adapter);
     }
 }
