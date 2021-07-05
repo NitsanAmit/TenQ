@@ -6,4 +6,11 @@
     <string name="token">Access Token: %1$s</string>
     <string name="aria_logo">TenQ Logo</string>
     <string name="aria_room_indicator">Room Indicator</string>
+    <string name="aria_create_room">Create room</string>
+    <string name="aria_scan_qr">Scan QR</string>
+    <string name="aria_join_with_id">Join with ID</string>
+    <string name="hint_room_name">Room name</string>
+    <string name="txt_create_new_room">Create new room</string>
+    <string name="cancel">Cancel</string>
+    <string name="create_room">Create Room</string>
 </resources>
