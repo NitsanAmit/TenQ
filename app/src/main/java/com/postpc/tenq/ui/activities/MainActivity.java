@@ -1,15 +1,20 @@
 package com.postpc.tenq.ui.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
 
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
+import com.postpc.tenq.services.RecorderService;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -26,15 +31,28 @@ import static com.postpc.tenq.network.SpotifyClient.CLIENT_ID;
 public class MainActivity extends TenQActivity {
 
     private static final int REQUEST_CODE = 1337;
+    private RecorderService recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recorder = new RecorderService();
         if (getAuthService().getCurrentUserId() == null) {
             startSpotifyAuthFlow();
         } else {
+            // TODO: maybe we want to move it later
+            // check is the user gave permission to use the microphone
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 0);
+
+            } else {
+
+                recorder.startRecorder();
+
+            }
             startRoomsActivity();
         }
     }
@@ -99,6 +117,12 @@ public class MainActivity extends TenQActivity {
                         Log.e("LoginActivity", "Profile failure: ", error);
                     }
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        recorder.stopRecorder();
     }
 
 }

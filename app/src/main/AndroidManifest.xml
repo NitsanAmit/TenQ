@@ -3,6 +3,7 @@
     package="com.postpc.tenq">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <queries>
         <package android:name="com.spotify.music" />
