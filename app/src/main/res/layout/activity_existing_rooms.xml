@@ -23,32 +23,25 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_join_with_id"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            style="@style/fab"
             android:backgroundTint="@android:color/white"
-            app:borderWidth="0dp"
+            app:tint="@color/black"
             android:contentDescription="@string/aria_join_with_id"
             android:src="@drawable/ic_link" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_scan_qr"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:contentDescription="@string/aria_scan_qr"
-            app:borderWidth="0dp"
-            android:src="@drawable/ic_qr" />
+            android:src="@drawable/ic_qr"
+            style="@style/fab"
+            />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_create_room"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
             android:backgroundTint="@color/primary"
             android:contentDescription="@string/aria_create_room"
             android:src="@drawable/ic_add"
-            app:borderWidth="0dp"
-            android:tint="@android:color/white" />
+            style="@style/fab"
+            />
     </LinearLayout>
 </RelativeLayout>

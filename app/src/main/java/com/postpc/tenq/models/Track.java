@@ -3,6 +3,7 @@ package com.postpc.tenq.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Track extends SpotifyEntity implements Serializable {
 
@@ -17,5 +18,11 @@ public class Track extends SpotifyEntity implements Serializable {
 
     @SerializedName("album")
     Album album;
+
+    @SerializedName("added_by")
+    User addedBy;
+
+    @SerializedName("added_at")
+    Date addedAt;
 
 }

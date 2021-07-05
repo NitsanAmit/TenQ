@@ -1,14 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.activities.RoomActivity">
-<ListView
-    android:id="@+id/list_exiting_rooms"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:listitem="@layout/item_existing_room"
-    />
-</LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_exiting_rooms"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_song" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/player"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="8dp"
+        android:orientation="vertical">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_join_with_id"
+            android:contentDescription="@string/aria_join_with_id"
+            android:src="@drawable/ic_export"
+            style="@style/fab"
+            />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_scan_qr"
+            android:backgroundTint="@color/primary"
+            android:contentDescription="@string/aria_scan_qr"
+            android:src="@drawable/ic_add"
+            style="@style/fab"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/player"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/primary"
+        android:orientation="horizontal">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:layout_margin="8dp"
+            android:elevation="0dp"
+            app:cardCornerRadius="25dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:id="@+id/img_album_cover"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:scaleType="centerCrop"
+                android:src="@color/indicator_good" />
+        </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:id="@+id/icon_skip_previous"
+            style="@style/system_icon_dark"
+            android:src="@drawable/ic_skip_previous" />
+
+        <ImageView
+            android:id="@+id/icon_play"
+            style="@style/system_icon_dark"
+            android:src="@drawable/ic_play" />
+
+        <ImageView
+            android:id="@+id/icon_pause"
+            style="@style/system_icon_dark"
+            android:src="@drawable/ic_pause" />
+
+        <SeekBar
+            android:id="@+id/seekbar_song_progress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:thumbTint="@color/white" />
+
+        <ImageView
+            android:id="@+id/icon_skip_next"
+            style="@style/system_icon_dark"
+            android:src="@drawable/ic_skip_next" />
+
+    </LinearLayout>
+</RelativeLayout>
