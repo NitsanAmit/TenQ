@@ -42,9 +42,10 @@ public class MainActivity extends TenQActivity {
     }
 
     private void startRoomsActivity() {
-        startActivity(new Intent(this, ExistingRoomsActivity.class));
         // todo - change this to RoomActivity.calss - only for check JoinQrActivity
         startActivity(new Intent(this, JoinQrActivity.class));
+//        startActivity(new Intent(this, ExistingRoomsActivity.class));
+
     }
 
     private void startSpotifyAuthFlow() {
