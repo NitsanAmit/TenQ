@@ -16,6 +16,8 @@ import com.postpc.tenq.ui.listeners.ITrackActionListener;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+
 public class RoomActivity extends TenQActivity {
 
     private ActivityRoomBinding binding;
@@ -26,7 +28,6 @@ public class RoomActivity extends TenQActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -37,19 +38,23 @@ public class RoomActivity extends TenQActivity {
             }
         }
 
+        //TODO get room playlist from Spotify
+        // SpotifyClient.getClient().getPlaylist(room.getPlaylist().getUri())...
+
 
         binding.recyclerTracks.setLayoutManager(new GridLayoutManager(this, 1));
         ITrackActionListener listener = track -> {
             Toast.makeText(RoomActivity.this, "Toggle like", Toast.LENGTH_SHORT).show(); //TODO
         };
-        TracksAdapter adapter = new TracksAdapter(room.getPlaylist().getTracks().getItems(), listener);
+        TracksAdapter adapter = new TracksAdapter(new ArrayList<>(), listener);
+//        TracksAdapter adapter = new TracksAdapter(room.getPlaylist().getTracks().getItems(), listener);
         binding.recyclerTracks.setAdapter(adapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 //TODO
-                // Remove item from backing list here
+                // Remove item from list
                 // adapter.notifyDataSetChanged();
                 Toast.makeText(RoomActivity.this, "Delete!", Toast.LENGTH_SHORT).show();
             }

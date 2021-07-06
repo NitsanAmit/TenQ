@@ -84,7 +84,7 @@ public class ExistingRoomsActivity extends TenQActivity {
 
     private void initRecyclerViewWithExistingRooms(List<Room> rooms) {
         binding.recyclerExistingRooms.setLayoutManager(new LinearLayoutManager(this));
-        IRoomActionListener listener = new IRoomActionListener(){ //TODO implement
+        IRoomActionListener actionListener = new IRoomActionListener() { //TODO implement
             @Override
             public void onRoomExport(Room room) {
                 Toast.makeText(ExistingRoomsActivity.this, "export clicked!", Toast.LENGTH_SHORT).show();
@@ -100,7 +100,16 @@ public class ExistingRoomsActivity extends TenQActivity {
                 Toast.makeText(ExistingRoomsActivity.this, "close clicked!", Toast.LENGTH_SHORT).show();
             }
         };
-        ExistingRoomsAdapter adapter = new ExistingRoomsAdapter(rooms != null ? rooms : new ArrayList<>(), listener);
+        View.OnClickListener itemClickListener = v -> {
+            int itemPosition = binding.recyclerExistingRooms.getChildLayoutPosition(v);
+            Intent intent = new Intent(this, RoomActivity.class);
+            intent.putExtra("room", rooms.get(itemPosition));
+            startActivity(intent);
+        };
+        ExistingRoomsAdapter adapter = new ExistingRoomsAdapter(
+                rooms != null ? rooms : new ArrayList<>(),
+                actionListener,
+                itemClickListener);
         binding.recyclerExistingRooms.setAdapter(adapter);
     }
 }

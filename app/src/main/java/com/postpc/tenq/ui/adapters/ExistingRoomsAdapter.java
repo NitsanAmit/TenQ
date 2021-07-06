@@ -19,12 +19,14 @@ public class ExistingRoomsAdapter extends RecyclerView.Adapter<ExistingRoomViewH
 
     private final List<Room> items;
     private final IRoomActionListener actionListener;
+    private final View.OnClickListener onItemClick;
     private boolean binding;
 
 
-    public ExistingRoomsAdapter(List<Room> items, IRoomActionListener actionListener) {
+    public ExistingRoomsAdapter(List<Room> items, IRoomActionListener actionListener, View.OnClickListener onItemClick) {
         this.items = items;
         this.actionListener = actionListener;
+        this.onItemClick = onItemClick;
     }
 
     @Override
@@ -37,6 +39,7 @@ public class ExistingRoomsAdapter extends RecyclerView.Adapter<ExistingRoomViewH
     @Override
     public ExistingRoomViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_existing_room, parent, false);
+        view.setOnClickListener(onItemClick);
         return new ExistingRoomViewHolder(view);
     }
 
