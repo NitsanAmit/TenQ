@@ -15,4 +15,5 @@
     <string name="create_room">Create Room</string>
     <string name="share_room">Share Room</string>
     <string name="copy_room_link">COPY ROOM LINK</string>
+    <string name="scan_qr_code">Scan QR Code</string>
 </resources>
