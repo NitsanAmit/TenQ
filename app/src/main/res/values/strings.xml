@@ -13,4 +13,6 @@
     <string name="txt_create_new_room">Create new room</string>
     <string name="cancel">Cancel</string>
     <string name="create_room">Create Room</string>
+    <string name="share_room">Share Room</string>
+    <string name="copy_room_link">COPY ROOM LINK</string>
 </resources>

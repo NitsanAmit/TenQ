@@ -43,7 +43,7 @@ public class MainActivity extends TenQActivity {
 
     private void startRoomsActivity() {
         // todo - change this to RoomActivity.calss - only for check JoinQrActivity
-        startActivity(new Intent(this, JoinQrActivity.class));
+        startActivity(new Intent(this, CreateQrActivity.class));
 //        startActivity(new Intent(this, ExistingRoomsActivity.class));
 
     }
