@@ -17,13 +17,19 @@ import net.glxn.qrgen.android.QRCode;
 
 public class CreateQrActivity extends TenQActivity {
 
-    // todo change "www.example.org" to real room-id
+    String roomId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join_qr);
         View view = getLayoutInflater().inflate(R.layout.activity_create_qr, null);
+
+        // todo change "www.example.org" to real roomId
+        Bundle b;
+        b = getIntent().getExtras();
+        String roomId = b.getString("roomId");
 
         generateQrCode(view);
 

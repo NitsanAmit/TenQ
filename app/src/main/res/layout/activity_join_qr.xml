@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".activities.JoinQrActivity">
+    tools:context=".ui.activities.JoinQrActivity">
+
 
     <TextView
-        android:id="@+id/textTitle"
+        android:id="@+id/textContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:text=""/>
-
-    <TextView
-        android:id="@+id/textContent"
-        android:text=""
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:layout_height="wrap_content" />
+        android:text="" />
 
     <Button
         android:id="@+id/scanBtn"
@@ -30,7 +22,7 @@
         android:layout_height="67dp"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:backgroundTint="#0F9D58"
-        android:text="Scan QR Code" />
+        android:backgroundTint="@color/primary"
+        android:text="@string/scan_qr_code" />
 
 </LinearLayout>
