@@ -34,7 +34,7 @@ public class JoinQrActivity extends TenQActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_join_qr);
 
-        scanBtn = findViewById(R.id.scanBtn);
+        scanBtn = findViewById(R.id.scan_button);
 
         // scan button listener
         scanBtn.setOnClickListener(this);
