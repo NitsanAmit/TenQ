@@ -91,7 +91,7 @@ public class RoomActivity extends TenQActivity {
 
         switch (item.getItemId()){
             case R.id.share: // for debugging use this room id: "yYQK9C19BGy8nt5C4zxY"
-                ShareAlertDialog.share(RoomActivity.this, "yYQK9C19BGy8nt5C4zxY");
+                ShareAlertDialog.share(RoomActivity.this, room.getId());
                 break;
             case R.id.settings:
                 startActivity(new Intent(RoomActivity.this, RoomSettingsActivity.class));

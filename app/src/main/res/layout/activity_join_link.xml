@@ -1,9 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="70dp"
     tools:context=".ui.activities.JoinLinkActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <EditText
+        android:id="@+id/insert_room_code"
+        android:layout_width="376dp"
+        android:layout_height="47dp"
+        android:layout_gravity="center"
+        android:background="@drawable/et_style"
+        android:padding="10dp"
+        android:hint="@string/insert_room_id" />
+
+    <Button
+        android:id="@+id/join_button"
+        android:layout_width="307dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_margin="480dp"
+        android:backgroundTint="@color/primary"
+        android:text="@string/join" />
+
+</LinearLayout>
