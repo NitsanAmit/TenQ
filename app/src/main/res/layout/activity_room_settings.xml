@@ -1,9 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".ui.activities.RoomSettingsActivity">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Switch
+        android:id="@+id/sound_awareness_button"
+        android:layout_width="327dp"
+        android:layout_height="16dp"
+        android:layout_weight="1"
+        android:text="@string/enable_sound_awareness"
+        android:textStyle="bold"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+
+    <TextView
+        android:id="@+id/sound_awareness_sub"
+        android:layout_width="283dp"
+        android:layout_height="42dp"
+        android:layout_weight="2"
+        android:text="@string/sound_awareness_sub_text" />
+
+    <Switch
+        android:id="@+id/allow_foreign_button"
+        android:layout_width="327dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:layout_marginTop="10dp"
+        android:text="@string/allow_foreign_actions"
+        android:textStyle="bold"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+
+    <TextView
+        android:id="@+id/allow_foreign_sub"
+        android:layout_width="285dp"
+        android:layout_height="42dp"
+        android:layout_weight="4"
+        android:text="@string/allow_foreign_sub_text" />
+
+
+</LinearLayout>
