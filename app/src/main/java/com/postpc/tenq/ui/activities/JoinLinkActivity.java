@@ -49,6 +49,7 @@ public class JoinLinkActivity extends TenQActivity {
         }
         String roomCode = insertRoomCode.getText().toString();
 
+
         // update fire-store
         FirebaseFirestore.getInstance().collection("rooms").document(roomCode)
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
