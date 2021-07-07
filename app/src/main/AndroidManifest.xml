@@ -25,7 +25,6 @@
         <activity android:name=".ui.activities.RoomActivity" />
         <activity android:name=".ui.activities.JoinQrActivity" />
         <activity android:name=".ui.activities.JoinLinkActivity" />
-        <activity android:name=".ui.activities.CreateQrActivity" />
         <activity android:name=".ui.activities.ExistingRoomsActivity"
             android:label="Existing Rooms"/>
         <activity android:name=".ui.activities.MainActivity"
