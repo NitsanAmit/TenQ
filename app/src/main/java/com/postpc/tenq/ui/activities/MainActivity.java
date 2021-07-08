@@ -32,11 +32,7 @@ public class MainActivity extends TenQActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (getAuthService().getCurrentUserId() == null) {
-            startSpotifyAuthFlow();
-        } else {
-            startRoomsActivity();
-        }
+        startSpotifyAuthFlow();
     }
 
     private void startRoomsActivity() {
@@ -74,7 +70,11 @@ public class MainActivity extends TenQActivity {
             String token = response.getAccessToken();
             Log.d("LoginActivity", "Got token!\n" + token);
             SpotifyClient.init(token);
-            getUserProfile();
+            if (getAuthService().getCurrentUser() == null) {
+                getUserProfile();
+            } else {
+                startRoomsActivity();
+            }
         }
     }
 
