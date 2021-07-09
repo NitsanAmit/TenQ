@@ -18,4 +18,7 @@ public class Album extends SpotifyEntity implements Serializable {
     @SerializedName("href")
     String href;
 
+    public SpotifyImage[] getImages() {
+        return images;
+    }
 }
