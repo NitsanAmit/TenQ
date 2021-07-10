@@ -1,21 +1,16 @@
-package com.postpc.tenq.ui.activities;
+package com.postpc.tenq.ui.ui_helpers;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.postpc.tenq.R;
-import com.postpc.tenq.core.TenQActivity;
 
 import net.glxn.qrgen.android.QRCode;
 
@@ -24,7 +19,7 @@ public class ShareAlertDialog {
 
     public static void share(Context context, String curRoomId) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-        View view = inflater.inflate(R.layout.activity_create_qr, null);
+        View view = inflater.inflate(R.layout.activity_share, null);
 
         String roomId = curRoomId;
 

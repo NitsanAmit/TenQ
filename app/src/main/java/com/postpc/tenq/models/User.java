@@ -24,6 +24,10 @@ public class User extends SpotifyEntity implements Serializable {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @NonNull
     @NotNull
     @Override

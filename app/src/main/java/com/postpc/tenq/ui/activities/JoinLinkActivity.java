@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.models.User;
 import com.postpc.tenq.models.UserRooms;
 
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +74,7 @@ public class JoinLinkActivity extends TenQActivity {
 
             private void activeRoomFlow(Room room) {
                 Intent intent = new Intent(JoinLinkActivity.this, RoomActivity.class);
-                intent.putExtra("roomId", roomCode);
+                intent.putExtra("room_id", roomCode);
 
                 // 1. add user id to guests list of room in fire-store (if not there already)
                 addUserToRoomGuests(room);
@@ -83,9 +84,6 @@ public class JoinLinkActivity extends TenQActivity {
                 startActivity(intent);
                 finish();
             }
-
-            // todo replace in all places "ndevsb08348lh237f132zai37" to getAuthService().getCurrentUserId()
-            // todo - "ndevsb08348lh237f132zai37" just an example of user-id
 
 
             private void addRoomToUserRooms(Room room) {
@@ -120,11 +118,19 @@ public class JoinLinkActivity extends TenQActivity {
 
             private void addUserToRoomGuests(Room room) {
                 // get list
-                List<String> roomGuests = room.getGuests();
+                List<User> roomGuests = room.getGuests();
                 // check if list contains user-id
-                if (!roomGuests.contains(getAuthService().getCurrentUserId())) {
+                boolean found = false;
+                for(User user : roomGuests){
+                    if(user.getId().equals(getAuthService().getCurrentUserId())){
+                        found = true;
+                        break;
+                    }
+                }
+                // add user to room if not inside already
+                if (!found) {
                     // update list with user-id
-                    roomGuests.add(getAuthService().getCurrentUserId());
+                    roomGuests.add(getAuthService().getCurrentUser());
                     FirebaseFirestore.getInstance().collection("rooms").document
                             (room.getId()).update("guests", roomGuests);
                 }
