@@ -12,7 +12,7 @@ public class Room implements Serializable {
     private boolean active;
     private long creationTime;
     private User host;
-    private List<String> guests;
+    private List<User> guests;
     private Playlist playlist;
 
     public Room() {
@@ -46,7 +46,7 @@ public class Room implements Serializable {
         return host;
     }
 
-    public List<String> getGuests() {
+    public List<User> getGuests() {
         return guests;
     }
 

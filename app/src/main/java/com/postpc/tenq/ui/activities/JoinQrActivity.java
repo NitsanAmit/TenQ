@@ -3,7 +3,6 @@ package com.postpc.tenq.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -16,38 +15,26 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.models.User;
 import com.postpc.tenq.models.UserRooms;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class JoinQrActivity extends TenQActivity implements View.OnClickListener {
+public class JoinQrActivity extends TenQActivity {
 
-    Button scanBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_join_qr);
-
-        scanBtn = findViewById(R.id.scan_button);
-
-        // scan button listener
-        scanBtn.setOnClickListener(this);
-
-    }
-
-    @Override
-    public void onClick(View v) {
-        // create IntentIntegrator class object of the class of QR library
         IntentIntegrator intentIntegrator = new IntentIntegrator(this);
-//      intentIntegrator.setPrompt("Scan QR Code"); // todo - maybe insert some text or use default like now
+        intentIntegrator.setPrompt("");
         intentIntegrator.setOrientationLocked(true);
         intentIntegrator.initiateScan();
+
     }
 
     /**
@@ -87,7 +74,7 @@ public class JoinQrActivity extends TenQActivity implements View.OnClickListener
 
                     private void activeRoomFlow(Room room) {
                         Intent intent = new Intent(JoinQrActivity.this, RoomActivity.class);
-                        intent.putExtra("roomId", qrResult);
+                        intent.putExtra("room_id", qrResult);
 
                         // 1. add user id to guests list of room in fire-store (if not there already)
                         addUserToRoomGuests(room);
@@ -97,9 +84,6 @@ public class JoinQrActivity extends TenQActivity implements View.OnClickListener
                         startActivity(intent);
                         finish();
                     }
-
-                    // todo replace in all places "ndevsb08348lh237f132zai37" to getAuthService().getCurrentUserId()
-                    // todo - "ndevsb08348lh237f132zai37" just an example of user-id
 
 
                     private void addRoomToUserRooms(Room room) {
@@ -134,11 +118,19 @@ public class JoinQrActivity extends TenQActivity implements View.OnClickListener
 
                     private void addUserToRoomGuests(Room room) {
                         // get list
-                        List<String> roomGuests = room.getGuests();
+                        List<User> roomGuests = room.getGuests();
                         // check if list contains user-id
-                        if (!roomGuests.contains(getAuthService().getCurrentUserId())) {
+                        boolean found = false;
+                        for(User user : roomGuests){
+                            if(user.getId().equals(getAuthService().getCurrentUserId())){
+                                found = true;
+                                break;
+                            }
+                        }
+                        // add user to room if not inside already
+                        if (!found) {
                             // update list with user-id
-                            roomGuests.add(getAuthService().getCurrentUserId());
+                            roomGuests.add(getAuthService().getCurrentUser());
                             FirebaseFirestore.getInstance().collection("rooms").document
                                     (room.getId()).update("guests", roomGuests);
                         }

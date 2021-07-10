@@ -18,6 +18,7 @@ import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.ui.adapters.TracksAdapter;
 import com.postpc.tenq.ui.listeners.ITrackActionListener;
+import com.postpc.tenq.ui.ui_helpers.ShareAlertDialog;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,46 +38,46 @@ public class RoomActivity extends TenQActivity {
         // use ActionBar
         ActionBar actionBar = getSupportActionBar();
 
-//        binding = ActivityRoomBinding.inflate(getLayoutInflater());
-//        setContentView(binding.getRoot());
-//
-//        Bundle extras = getIntent().getExtras();
-//        if (extras != null) {
-//            room = (Room) extras.getSerializable("room");
-//            if (room == null) {
-//                String roomId = extras.getString("room_id");
-//                //TODO fetch room details from Firestore
-//            }
-//        }
-//
-//        //TODO get room playlist from Spotify
-//        // SpotifyClient.getClient().getPlaylist(room.getPlaylist().getUri())...
-//
-//
-//        binding.recyclerTracks.setLayoutManager(new GridLayoutManager(this, 1));
-//        ITrackActionListener listener = track -> {
-//            Toast.makeText(RoomActivity.this, "Toggle like", Toast.LENGTH_SHORT).show(); //TODO
-//        };
-//        TracksAdapter adapter = new TracksAdapter(new ArrayList<>(), listener);
-////        TracksAdapter adapter = new TracksAdapter(room.getPlaylist().getTracks().getItems(), listener);
-//        binding.recyclerTracks.setAdapter(adapter);
-//
-//        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-//            @Override
-//            public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int swipeDir) {
-//                //TODO
-//                // Remove item from list
-//                // adapter.notifyDataSetChanged();
-//                Toast.makeText(RoomActivity.this, "Delete!", Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
-//                return false;
-//            }
-//        });
-//
-//        itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
+        binding = ActivityRoomBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            room = (Room) extras.getSerializable("room");
+            if (room == null) {
+                String roomId = extras.getString("room_id");
+                //TODO fetch room details from Firestore
+            }
+        }
+
+        //TODO get room playlist from Spotify
+        // SpotifyClient.getClient().getPlaylist(room.getPlaylist().getUri())...
+
+
+        binding.recyclerTracks.setLayoutManager(new GridLayoutManager(this, 1));
+        ITrackActionListener listener = track -> {
+            Toast.makeText(RoomActivity.this, "Toggle like", Toast.LENGTH_SHORT).show(); //TODO
+        };
+        TracksAdapter adapter = new TracksAdapter(new ArrayList<>(), listener);
+//        TracksAdapter adapter = new TracksAdapter(room.getPlaylist().getTracks().getItems(), listener);
+        binding.recyclerTracks.setAdapter(adapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                //TODO
+                // Remove item from list
+                // adapter.notifyDataSetChanged();
+                Toast.makeText(RoomActivity.this, "Delete!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+        });
+
+        itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
     }
 
     /** inflate the menu */
@@ -94,7 +95,9 @@ public class RoomActivity extends TenQActivity {
                 ShareAlertDialog.share(RoomActivity.this, room.getId());
                 break;
             case R.id.settings:
-                startActivity(new Intent(RoomActivity.this, RoomSettingsActivity.class));
+                Intent intent = new Intent(RoomActivity.this, RoomSettingsActivity.class);
+                intent.putExtra("room_id",room.getId()); // for debugging use this room id: "yYQK9C19BGy8nt5C4zxY"
+                startActivity(intent);
                 break;
             case R.id.edit:
                 Toast.makeText(this, "edit Clicked", Toast.LENGTH_SHORT).show();
