@@ -15,6 +15,18 @@ public class SpotifyEntity implements Serializable {
     @SerializedName("uri")
     String uri;
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
     public String getId() {
         return id;
     }

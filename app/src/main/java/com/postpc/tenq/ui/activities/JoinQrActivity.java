@@ -73,7 +73,7 @@ public class JoinQrActivity extends TenQActivity {
                     }
 
                     private void activeRoomFlow(Room room) {
-                        Intent intent = new Intent(JoinQrActivity.this, RoomActivity.class);
+                        Intent intent = new Intent(JoinQrActivity.this, ExistingRoomsActivity.class);
                         intent.putExtra("room_id", qrResult);
 
                         // 1. add user id to guests list of room in fire-store (if not there already)
