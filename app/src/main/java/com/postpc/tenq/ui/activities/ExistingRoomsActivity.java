@@ -65,7 +65,12 @@ public class ExistingRoomsActivity extends TenQActivity {
                         Log.d("ExistingRoomsActivity", "no rooms found.", error);
                         return;
                     }
-                    getRoomsDetails((List<String>) value.get("roomIds"));
+                    List<String> roomIds = (List<String>) value.get("roomIds");
+                    if (roomIds == null || roomIds.size() == 0) {
+                        initRecyclerViewWithExistingRooms(new ArrayList<>());
+                    }else {
+                        getRoomsDetails(roomIds);
+                    }
                 });
     }
 

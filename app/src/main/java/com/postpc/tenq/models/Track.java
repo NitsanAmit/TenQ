@@ -46,4 +46,8 @@ public class Track extends SpotifyEntity implements Serializable {
     public boolean isInUserLibrary() {
         return inUserLibrary;
     }
+
+    public void setInUserLibrary(boolean inUserLibrary) {
+        this.inUserLibrary = inUserLibrary;
+    }
 }

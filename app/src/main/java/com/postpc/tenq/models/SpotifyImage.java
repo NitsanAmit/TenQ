@@ -9,4 +9,7 @@ public class SpotifyImage implements Serializable {
     @SerializedName("url")
     String url;
 
+    public String getUrl() {
+        return url;
+    }
 }

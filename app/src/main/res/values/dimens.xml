@@ -3,4 +3,6 @@
     <dimen name="text_item_title">20sp</dimen>
     <dimen name="text_item_description">16sp</dimen>
     <dimen name="text_link">18sp</dimen>
+    <dimen name="text_track_title">18sp</dimen>
+    <dimen name="text_track_description">14sp</dimen>
 </resources>

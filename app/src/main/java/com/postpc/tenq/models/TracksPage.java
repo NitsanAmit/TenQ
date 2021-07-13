@@ -26,9 +26,13 @@ public class TracksPage implements Serializable {
     String previous;
 
     @SerializedName("items")
-    List<Track> items;
+    List<PlaylistTrack> items;
 
-    public List<Track> getItems() {
+    public List<PlaylistTrack> getItems() {
         return items;
+    }
+
+    public String getNext() {
+        return next;
     }
 }
