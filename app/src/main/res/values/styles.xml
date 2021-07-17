@@ -50,4 +50,10 @@
         <item name="borderWidth">0dp</item>
         <item name="tint">@color/white</item>
     </style>
+
+    <style name="settings_title">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>

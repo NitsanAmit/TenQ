@@ -33,8 +33,8 @@ public class MainActivity extends TenQActivity {
         setContentView(R.layout.activity_main);
 
         startSpotifyAuthFlow();
-    }
 
+    }
     private void startRoomsActivity() {
         startActivity(new Intent(this, ExistingRoomsActivity.class));
     }
@@ -91,6 +91,7 @@ public class MainActivity extends TenQActivity {
                             Log.d("LoginActivity", "Got profile!\n" + profile.toString());
                             MainActivity.this.getAuthService().saveCurrentUser(profile);
                             startRoomsActivity();
+                            finish();
                         }
                     }
 

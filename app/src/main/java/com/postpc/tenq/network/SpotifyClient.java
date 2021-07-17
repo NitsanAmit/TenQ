@@ -12,7 +12,7 @@ public class SpotifyClient {
     public static final String REDIRECT_URI = "compostpctenq://spotifycallback";
     public static final String[] AUTHORIZATION_SCOPES = {
             "user-read-email", "user-top-read", "user-modify-playback-state",
-            "playlist-modify-public", "playlist-modify-private"
+            "playlist-modify-public", "playlist-modify-private", "user-library-read", "user-library-modify"
     };
 
     private static SpotifyApiService spotifyApiService;
