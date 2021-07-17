@@ -17,8 +17,6 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
 
 public interface SpotifyApiService {
 
@@ -33,9 +31,6 @@ public interface SpotifyApiService {
 
     @DELETE("me/tracks")
     Call<Void> removeTrackForUser(@Query("ids") String trackId);
-
-    @GET("users/{user-id}") //Get user by id
-    Call<User> getUserProfileName(@Path("user-id") String userId);
 
     @GET("search")
     Call<SearchResult> searchTracks(@Query("q") String query, @Query("type") String type, @Query("limit") int limit, @Query("offset") int offset);
