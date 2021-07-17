@@ -40,6 +40,7 @@ public class ExistingRoomsActivity extends TenQActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityExistingRoomsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        //TODO move all the firebase logic to a viewmodel
         getUserExistingRooms();
 
         binding.fabCreateRoom.setOnClickListener(v -> {
@@ -50,7 +51,7 @@ public class ExistingRoomsActivity extends TenQActivity {
             alertDialog.show();
             view.findViewById(R.id.txt_cancel).setOnClickListener(cancel -> alertDialog.dismiss());
             view.findViewById(R.id.txt_create_room).setOnClickListener(createRoom -> {
-                TextInputEditText editText = (TextInputEditText) view.findViewById(R.id.input_room_name);
+                TextInputEditText editText = view.findViewById(R.id.input_room_name);
                 if (TextUtils.isEmpty(editText.getText())) {
                     editText.setError("Can't be empty");
                 } else {
