@@ -7,14 +7,4 @@
     android:orientation="vertical"
     tools:context=".ui.activities.JoinQrActivity">
 
-    
-    <Button
-        android:id="@+id/scan_button"
-        android:layout_width="189dp"
-        android:layout_height="67dp"
-        android:layout_gravity="center"
-        android:layout_margin="50dp"
-        android:backgroundTint="@color/primary"
-        android:text="@string/scan_qr_code" />
-
 </LinearLayout>

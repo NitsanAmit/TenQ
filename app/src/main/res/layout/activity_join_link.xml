@@ -1,30 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:paddingTop="70dp"
     tools:context=".ui.activities.JoinLinkActivity">
 
 
-    <EditText
-        android:id="@+id/insert_room_code"
-        android:layout_width="376dp"
-        android:layout_height="47dp"
-        android:layout_gravity="center"
-        android:background="@drawable/et_style"
-        android:padding="10dp"
-        android:hint="@string/insert_room_id" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/name_text_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_marginTop="16dp"
+        app:errorEnabled="true">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_txt_roomId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/insert_room_id"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/join_button"
-        android:layout_width="307dp"
-        android:layout_height="48dp"
+        android:id="@+id/btn_join_room"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_gravity="center"
-        android:layout_margin="480dp"
+        android:layout_margin="16dp"
         android:backgroundTint="@color/primary"
         android:text="@string/join" />
-
-</LinearLayout>
+</RelativeLayout>

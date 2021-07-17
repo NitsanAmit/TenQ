@@ -91,6 +91,7 @@ public class MainActivity extends TenQActivity {
                             Log.d("LoginActivity", "Got profile!\n" + profile.toString());
                             MainActivity.this.getAuthService().saveCurrentUser(profile);
                             startRoomsActivity();
+                            finish();
                         }
                     }
 

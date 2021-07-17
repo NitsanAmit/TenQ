@@ -1,5 +1,6 @@
-package com.postpc.tenq.ui.ui_helpers;
+package com.postpc.tenq.ui.helpers;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,20 +15,17 @@ import com.postpc.tenq.R;
 
 import net.glxn.qrgen.android.QRCode;
 
-public class ShareAlertDialog {
+public class RoomSharingDialogUtil {
 
-
-    public static void share(Context context, String curRoomId) {
+    public static AlertDialog getShareDialogForRoom(Activity context, String roomId) {
+        if (context.isFinishing() || context.isDestroyed()) return null;
         LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         View view = inflater.inflate(R.layout.activity_share, null);
-
-        String roomId = curRoomId;
 
         generateQrCode(view, roomId);
 
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setView(view).create();
-        alertDialog.show();
 
         // cancel button
         view.findViewById(R.id.txt_cancel).setOnClickListener(cancel -> alertDialog.dismiss());
@@ -46,7 +44,7 @@ public class ShareAlertDialog {
                 Toast.makeText(context.getApplicationContext(), "Data Copied to Clipboard", Toast.LENGTH_SHORT).show();
             }
         });
-
+        return alertDialog;
     }
 
     private static void generateQrCode(View view, String curRoomId) {
