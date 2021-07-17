@@ -1,4 +1,4 @@
-package com.postpc.tenq.ui.adapters;
+package com.postpc.tenq.ui.adapters.viewholders;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -13,12 +13,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class ExistingRoomViewHolder extends RecyclerView.ViewHolder {
 
-    TextView roomName;
-    TextView roomDescription;
-    ImageView indicator;
-    ImageView closeRoomIcon;
-    ImageView exportRoomIcon;
-    ImageView deleteRoomIcon;
+    public TextView roomName;
+    public TextView roomDescription;
+    public ImageView indicator;
+    public ImageView closeRoomIcon;
+    public ImageView exportRoomIcon;
+    public ImageView deleteRoomIcon;
 
     public ExistingRoomViewHolder(@NonNull @NotNull View itemView) {
         super(itemView);

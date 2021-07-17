@@ -1,4 +1,4 @@
-package com.postpc.tenq.ui.adapters;
+package com.postpc.tenq.ui.adapters.viewholders;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -13,8 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class UserNameViewHolder extends RecyclerView.ViewHolder{
 
-    TextView userName;
-    ImageView deleteUser;
+    public TextView userName;
+    public ImageView deleteUser;
 
     public UserNameViewHolder(@NonNull @NotNull View itemView) {
         super(itemView);

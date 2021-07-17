@@ -1,4 +1,4 @@
-package com.postpc.tenq.ui.adapters;
+package com.postpc.tenq.ui.adapters.viewholders;
 
 import android.view.View;
 import android.widget.ImageView;
@@ -13,10 +13,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class SongSearchViewHolder extends RecyclerView.ViewHolder{
 
-    TextView songName;
-    TextView artistName;
-    ImageView albumCover;
-    ImageView addSongButton;
+    public TextView songName;
+    public TextView artistName;
+    public ImageView albumCover;
+    public ImageView addSongButton;
 
     public SongSearchViewHolder(@NonNull @NotNull View itemView) {
         super(itemView);

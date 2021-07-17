@@ -1,4 +1,4 @@
-package com.postpc.tenq.ui.adapters;
+package com.postpc.tenq.ui.helpers;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;

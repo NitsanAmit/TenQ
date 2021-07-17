@@ -11,16 +11,25 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivityExistingRoomsBinding;
+import com.postpc.tenq.models.Playlist;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.models.User;
+import com.postpc.tenq.network.SpotifyClient;
 import com.postpc.tenq.ui.adapters.ExistingRoomsAdapter;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ExistingRoomsActivity extends TenQActivity {
 
@@ -45,15 +54,67 @@ public class ExistingRoomsActivity extends TenQActivity {
                 if (TextUtils.isEmpty(editText.getText())) {
                     editText.setError("Can't be empty");
                 } else {
-                    Intent intent = new Intent(this, RoomActivity.class);
-                    intent.putExtra("room_name", editText.getText().toString());
-                    startActivity(intent);
+                    createNewRoom(editText.getText().toString());
                     alertDialog.dismiss();
                 }
             });
         });
         binding.fabJoinWithId.setOnClickListener(v -> startActivity(new Intent(this, JoinLinkActivity.class)));
         binding.fabScanQr.setOnClickListener(v -> startActivity(new Intent(this, JoinQrActivity.class)));
+    }
+
+    private void createNewRoom(String roomName) {
+        User currentUser = getAuthService().getCurrentUser();
+        HashMap<String, Object> playlistDetails = new HashMap<>(4);
+        playlistDetails.put("name", "TenQ - " + roomName);
+        playlistDetails.put("public", false);
+        playlistDetails.put("collaborative", true);
+        playlistDetails.put("description", String.format("Your TenQ Collaborative playlist, for room '%s'", roomName));
+        SpotifyClient.getClient().createPlaylist(currentUser.getId(), playlistDetails).enqueue(new Callback<Playlist>() {
+            @Override
+            public void onResponse(Call<Playlist> call, Response<Playlist> response) {
+                if (response.isSuccessful()) {
+                    Room newRoom = new Room(roomName, currentUser);
+                    newRoom.setPlaylist(response.body());
+                    saveRoomInFirestore(newRoom);
+                } else {
+                    Toast.makeText(ExistingRoomsActivity.this, "Error creating room - try again later", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Playlist> call, Throwable t) {
+                Log.e("RoomActivity", "Can't create room", t);
+                Toast.makeText(ExistingRoomsActivity.this, "Error creating room - try again later", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void saveRoomInFirestore(Room newRoom) {
+        FirebaseFirestore.getInstance()
+                .collection("rooms")
+                .add(newRoom)
+                .addOnSuccessListener(documentReference -> {
+                    String roomId = documentReference.getId();
+                    newRoom.setId(roomId);
+                    documentReference.update("id", roomId);
+                    pushRoomIdToUserRooms(roomId);
+                    Intent intent = new Intent(ExistingRoomsActivity.this, RoomActivity.class);
+                    intent.putExtra("room", newRoom);
+                    startActivity(intent);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("RoomActivity", "Can't create room", e);
+                    Toast.makeText(ExistingRoomsActivity.this, "Error creating room - try again later", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void pushRoomIdToUserRooms(String roomId) {
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(getAuthService().getCurrentUserId())
+                .update("roomIds", FieldValue.arrayUnion(roomId));
     }
 
     private void getUserExistingRooms() {
@@ -68,7 +129,7 @@ public class ExistingRoomsActivity extends TenQActivity {
                     List<String> roomIds = (List<String>) value.get("roomIds");
                     if (roomIds == null || roomIds.size() == 0) {
                         initRecyclerViewWithExistingRooms(new ArrayList<>());
-                    }else {
+                    } else {
                         getRoomsDetails(roomIds);
                     }
                 });

@@ -1,9 +1,9 @@
 package com.postpc.tenq.ui.listeners;
 
-import com.postpc.tenq.models.Track;
-
 public interface ITrackActionListener {
 
-    void onTrackLikeToggle(Track track);
+    void onTrackLiked(int trackPosition, String trackId);
+
+    void onTrackUnliked(int trackPosition, String trackId);
 
 }

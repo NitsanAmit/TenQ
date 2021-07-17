@@ -37,6 +37,7 @@ public class MainActivity extends TenQActivity {
     }
     private void startRoomsActivity() {
         startActivity(new Intent(this, ExistingRoomsActivity.class));
+        finish();
     }
 
     private void startSpotifyAuthFlow() {

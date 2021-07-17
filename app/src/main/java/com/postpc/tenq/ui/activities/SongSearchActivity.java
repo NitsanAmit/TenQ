@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivitySongSearchBinding;
-import com.postpc.tenq.ui.adapters.PagingScrollListener;
+import com.postpc.tenq.ui.listeners.PagingScrollListener;
 import com.postpc.tenq.ui.adapters.SongSearchAdapter;
 import com.postpc.tenq.viewmodels.SongSearchActivityViewModel;
 

@@ -8,9 +8,12 @@ import android.widget.ProgressBar;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ListAdapter;
 
+import com.bumptech.glide.Glide;
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.SpotifyEntity;
 import com.postpc.tenq.models.Track;
+import com.postpc.tenq.ui.adapters.viewholders.SongSearchViewHolder;
+import com.postpc.tenq.ui.helpers.TracksDiffItemCallback;
 import com.postpc.tenq.ui.listeners.IOnSongAddClickedListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +51,11 @@ public class SongSearchAdapter extends ListAdapter<Track, SongSearchViewHolder> 
             if (binding) return;
             listener.songAddClicked(track);
         });
+        if (hasCoverImage(track)) {
+            Glide.with(holder.albumCover).load(track.getAlbum().getImages()[0].getUrl()).placeholder(R.drawable.ic_music_note).into(holder.albumCover);
+        } else {
+            Glide.with(holder.albumCover).load(R.drawable.ic_music_note).into(holder.albumCover);
+        }
         binding = false;
     }
 
@@ -56,6 +64,10 @@ public class SongSearchAdapter extends ListAdapter<Track, SongSearchViewHolder> 
         super.onCurrentListChanged(previousList, currentList);
         progressBar.setVisibility(View.GONE);
         notifyDataSetChanged();
+    }
+
+    private boolean hasCoverImage(Track trackData) {
+        return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().length > 0;
     }
 
 }

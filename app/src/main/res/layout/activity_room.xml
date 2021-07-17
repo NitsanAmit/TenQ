@@ -5,13 +5,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.activities.RoomActivity">
-
+    <ProgressBar
+        android:id="@+id/progress_list_loading"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:indeterminateTint="@color/primary"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        />
+    <TextView
+        android:id="@+id/txt_error_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:text="Error loading room :("
+        style="@style/item_description"
+        android:gravity="center"
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_tracks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/item_song" />
-
+        tools:listitem="@layout/item_track"
+        android:layout_above="@id/player"
+        />
+    <ProgressBar
+        android:id="@+id/progress_loading_more"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:layout_above="@id/player"
+        android:indeterminateTint="@color/primary"
+        android:visibility="gone"
+        />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -43,7 +69,9 @@
         android:layout_height="64dp"
         android:layout_alignParentBottom="true"
         android:background="@color/primary"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="visible"
+        >
 
         <androidx.cardview.widget.CardView
             android:layout_width="48dp"
@@ -83,7 +111,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
-            android:thumbTint="@color/white" />
+            android:thumbTint="@color/white"
+            android:progressTint="@color/white"
+            />
 
         <ImageView
             android:id="@+id/icon_skip_next"

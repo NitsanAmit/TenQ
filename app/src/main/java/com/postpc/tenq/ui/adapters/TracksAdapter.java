@@ -1,61 +1,130 @@
 package com.postpc.tenq.ui.adapters;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.ListAdapter;
 
+import com.bumptech.glide.Glide;
 import com.postpc.tenq.R;
-import com.postpc.tenq.models.Room;
+import com.postpc.tenq.models.PlaylistTrack;
 import com.postpc.tenq.models.Track;
-import com.postpc.tenq.ui.listeners.IRoomActionListener;
+import com.postpc.tenq.ui.adapters.viewholders.TrackViewHolder;
+import com.postpc.tenq.ui.helpers.PlaylistTracksDiffItemCallback;
+import com.postpc.tenq.ui.listeners.IOnDragStartListener;
 import com.postpc.tenq.ui.listeners.ITrackActionListener;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-public class TracksAdapter extends RecyclerView.Adapter<TrackViewHolder> {
-
-    private final List<Track> items;
-    private final ITrackActionListener actionListener;
-    private boolean binding;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
-    public TracksAdapter(List<Track> items, ITrackActionListener actionListener) {
-        this.items = items;
-        this.actionListener = actionListener;
+public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
+
+    private static final SimpleDateFormat dateFormat;
+
+    static {
+        dateFormat = new SimpleDateFormat("dd/MM/yy, hh:mm", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getDefault());
     }
 
-    @Override
-    public int getItemCount() {
-        return items.size();
+    private final ITrackActionListener actionListener;
+    private final IOnDragStartListener dragStartListener;
+    private final ProgressBar progressBar;
+    private boolean binding;
+
+    public TracksAdapter(ITrackActionListener actionListener, IOnDragStartListener dragStartListener, ProgressBar progressLoading) {
+        super(new PlaylistTracksDiffItemCallback());
+        this.actionListener = actionListener;
+        this.dragStartListener = dragStartListener;
+        this.progressBar = progressLoading;
     }
 
     @NonNull
     @NotNull
     @Override
     public TrackViewHolder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
-        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_song, parent, false);
+        final View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_track, parent, false);
         return new TrackViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull TrackViewHolder holder, int position) {
         binding = true;
-        Track track = this.items.get(position);
-        holder.trackName.setText(track.getName());
-        holder.trackDescription.setText(String.format("Added by %s at %s",
-                track.getAddedBy().getName(), track.getAddedAt().toString()));
-        if (track.isInUserLibrary()) {
-            holder.emptyLikeIcon.setVisibility(View.GONE);
-            holder.fullLikeIcon.setVisibility(View.VISIBLE);
+        PlaylistTrack track = getItem(position);
+        Track trackData = track.getTrack();
+        holder.trackName.setText(trackData.getName());
+        holder.trackDescription.setText(getTrackDescription(track));
+        if (hasCoverImage(trackData)) {
+            Glide.with(holder.albumCover).load(trackData.getAlbum().getImages()[0].getUrl()).into(holder.albumCover);
         } else {
-            holder.emptyLikeIcon.setVisibility(View.VISIBLE);
-            holder.fullLikeIcon.setVisibility(View.GONE);
+            Glide.with(holder.albumCover).load(R.drawable.ic_music_note).into(holder.albumCover);
         }
+        if (trackData.isInUserLibrary()) {
+            holder.emptyLikeIcon.setVisibility(View.GONE);
+            holder.emptyLikeIcon.setOnClickListener(null);
+            holder.fullLikeIcon.setVisibility(View.VISIBLE);
+            holder.fullLikeIcon.setOnClickListener(v -> {
+                if (!binding) {
+                    actionListener.onTrackUnliked(position, trackData.getId());
+                }
+            });
+        } else {
+            holder.fullLikeIcon.setVisibility(View.GONE);
+            holder.fullLikeIcon.setOnClickListener(null);
+            holder.emptyLikeIcon.setVisibility(View.VISIBLE);
+            holder.emptyLikeIcon.setOnClickListener(v -> {
+                if (!binding) {
+                    actionListener.onTrackLiked(position, trackData.getId());
+                }
+            });
+        }
+
+        holder.reorderIcon.setOnTouchListener((view, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                dragStartListener.onStartDrag(holder);
+            }
+            return false;
+        });
+
         binding = false;
+    }
+
+    @Override
+    public void onCurrentListChanged(@NonNull @NotNull List<PlaylistTrack> previousList, @NonNull @NotNull List<PlaylistTrack> currentList) {
+        super.onCurrentListChanged(previousList, currentList);
+        progressBar.setVisibility(View.GONE);
+        notifyDataSetChanged();
+    }
+
+    @NotNull
+    private String getTrackDescription(PlaylistTrack track) {
+        String addedBy = track.getAddedBy().getName();
+        return !TextUtils.isEmpty(addedBy)
+                ? String.format("%s added at %s", addedBy, dateFormat.format(track.getAddedAt()))
+                : String.format("Added %s", dateFormat.format(track.getAddedAt()));
+    }
+
+    private boolean hasCoverImage(Track trackData) {
+        return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().length > 0;
+    }
+
+
+    public void swapItems(int fromPosition, int toPosition) {
+        List<PlaylistTrack> items = new ArrayList<>(getCurrentList());
+        Collections.swap(items, fromPosition, toPosition);
+        submitList(items, () -> {
+            notifyItemMoved(fromPosition, toPosition);
+        });
     }
 }

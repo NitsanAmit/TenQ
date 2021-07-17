@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.User;
+import com.postpc.tenq.ui.adapters.viewholders.UserNameViewHolder;
 
 import org.jetbrains.annotations.NotNull;
 

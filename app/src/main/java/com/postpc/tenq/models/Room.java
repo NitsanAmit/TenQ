@@ -30,6 +30,10 @@ public class Room implements Serializable {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -53,4 +57,9 @@ public class Room implements Serializable {
     public Playlist getPlaylist() {
         return playlist;
     }
+
+    public void setPlaylist(Playlist playlist) {
+        this.playlist = playlist;
+    }
+
 }

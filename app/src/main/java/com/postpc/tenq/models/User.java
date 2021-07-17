@@ -34,9 +34,9 @@ public class User extends SpotifyEntity implements Serializable {
     public String toString() {
         return "User Details:" +
                 "\nid: " + id +
-                "\nusername: " + name +
-                "\nemail: " + email +
-                "\nprofileLink: " + profileLink +
-                "\nimages: " + String.join(",", Arrays.stream(images).map(image -> image.url).toArray(String[]::new));
+                "\nusername: " + (name == null ? "" : name) +
+                "\nemail: " + (email == null ? "" : email) +
+                "\nprofileLink: " + (profileLink == null ? "" : profileLink) +
+                "\nimages: " + (images == null || images.length == 0 ? "" : String.join(",", Arrays.stream(images).map(image -> image.url).toArray(String[]::new)));
     }
 }

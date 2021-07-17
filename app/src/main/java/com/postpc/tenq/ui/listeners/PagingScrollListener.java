@@ -1,4 +1,4 @@
-package com.postpc.tenq.ui.adapters;
+package com.postpc.tenq.ui.listeners;
 
 import android.view.View;
 import android.widget.ProgressBar;

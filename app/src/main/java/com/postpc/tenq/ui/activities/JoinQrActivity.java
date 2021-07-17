@@ -60,7 +60,7 @@ public class JoinQrActivity extends TenQActivity {
 
     private void startRoomActivity(Room room) {
         Intent intent = new Intent(JoinQrActivity.this, RoomActivity.class);
-        intent.putExtra("roomId", room.getId());
+        intent.putExtra("room", room);
         startActivity(intent);
         finish();
     }

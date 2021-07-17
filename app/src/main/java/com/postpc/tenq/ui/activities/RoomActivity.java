@@ -7,86 +7,131 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.ui.listeners.IOnDragStartListener;
+import com.postpc.tenq.ui.listeners.PagingScrollListener;
 import com.postpc.tenq.ui.adapters.TracksAdapter;
-import com.postpc.tenq.ui.listeners.ITrackActionListener;
+import com.postpc.tenq.ui.helpers.TrackTouchCallback;
 import com.postpc.tenq.ui.helpers.RoomSharingDialogUtil;
+import com.postpc.tenq.ui.listeners.ITrackActionListener;
+import com.postpc.tenq.ui.listeners.TrackActionListener;
+import com.postpc.tenq.viewmodels.RoomActivityViewModel;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 
 public class RoomActivity extends TenQActivity {
 
     private ActivityRoomBinding binding;
+    private ItemTouchHelper itemTouchHelper;
     private Room room;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // sets new action bar theme
         super.onCreate(savedInstanceState);
-
-
         binding = ActivityRoomBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setUiLoadingState(true);
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             room = (Room) extras.getSerializable("room");
             if (room == null) {
                 String roomId = extras.getString("roomId");
-                //TODO fetch room details from Firestore
+                fetchRoomFromFirestore(roomId);
+                return;
             }
         }
+        initRecyclerViewAndLoadPlaylist();
+    }
 
-        //TODO get room playlist from Spotify
-        // SpotifyClient.getClient().getPlaylist(room.getPlaylist().getUri())...
+    private void fetchRoomFromFirestore(String roomId) {
+        FirebaseFirestore.getInstance()
+                .collection("rooms")
+                .document(roomId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        room = task.getResult().toObject(Room.class);
+                        initRecyclerViewAndLoadPlaylist();
+                    } else {
+                        Log.e("RoomActivity", "Can't fetch room", task.getException());
+                        binding.txtErrorState.setVisibility(View.VISIBLE);
+                        binding.player.setVisibility(View.GONE);
+                        binding.fabAddSong.setVisibility(View.GONE);
+                        binding.fabExportPlaylist.setVisibility(View.GONE);
+                    }
+                });
+    }
 
+    private void initRecyclerViewAndLoadPlaylist() {
+        getSupportActionBar().setTitle(room.getName());
+        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class)));
+        // Set the layout manager
+        binding.recyclerTracks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 
-        binding.recyclerTracks.setLayoutManager(new GridLayoutManager(this, 1));
-        ITrackActionListener listener = track -> {
-            Toast.makeText(RoomActivity.this, "Toggle like", Toast.LENGTH_SHORT).show(); //TODO
-        };
-        TracksAdapter adapter = new TracksAdapter(new ArrayList<>(), listener);
-//        TracksAdapter adapter = new TracksAdapter(room.getPlaylist().getTracks().getItems(), listener);
+        // Set "Add song to library" action listener (when user clicks the heart icon)
+        ITrackActionListener listener = new TrackActionListener(this::setTrackLiked);
+        IOnDragStartListener onDragStartListener = viewHolder -> itemTouchHelper.startDrag(viewHolder);
+        // Create the recycler view adapter
+        TracksAdapter adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore);
+
+        // Get the activity's view model
+        RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);
+
+        // Set a "load next page" listener when user scroll to the bottom of the list
+        binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage, binding.progressLoadingMore));
+
+        // Set an ItemTouchHelper for removing tracks from the list with a swipe motion
+        itemTouchHelper = new ItemTouchHelper(new TrackTouchCallback(model, adapter));
+        itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
+
         binding.recyclerTracks.setAdapter(adapter);
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            @Override
-            public void onSwiped(@NotNull RecyclerView.ViewHolder viewHolder, int swipeDir) {
-                //TODO
-                // Remove item from list
-                // adapter.notifyDataSetChanged();
-                Toast.makeText(RoomActivity.this, "Delete!", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
-                return false;
+        // Fetch the first page of tracks
+        model.getTracks(room.getPlaylist().getId()).observe(this, list -> {
+            adapter.submitList(list);
+            if (list != null && binding.progressListLoading.getVisibility() == View.VISIBLE) {
+                setUiLoadingState(false);
             }
         });
 
-        itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
-        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class)));
+    }
+
+    private void setTrackLiked(int trackPosition, boolean isLiked) {
+        TracksAdapter tracksAdapter = (TracksAdapter) binding.recyclerTracks.getAdapter();
+        tracksAdapter.getCurrentList().get(trackPosition).getTrack().setInUserLibrary(isLiked);
+        tracksAdapter.notifyItemChanged(trackPosition);
+    }
+
+    private void setUiLoadingState(boolean isLoading) {
+        int progressBarVisibility = isLoading ? View.VISIBLE : View.GONE;
+        int otherViewsVisibility = isLoading ? View.GONE : View.VISIBLE;
+        binding.progressListLoading.setVisibility(progressBarVisibility);
+        binding.recyclerTracks.setVisibility(otherViewsVisibility);
+        binding.player.setVisibility(otherViewsVisibility);
+        binding.fabAddSong.setVisibility(otherViewsVisibility);
+        binding.fabExportPlaylist.setVisibility(otherViewsVisibility);
     }
 
     /** inflate the menu */
     public boolean onCreateOptionsMenu( Menu menu ) {
-        getMenuInflater().inflate(R.menu.inside_room, menu);
+        getMenuInflater().inflate(R.menu.menu_room_activity, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     /**  control operations fpr clicking on the action buttons */
-    public boolean onOptionsItemSelected( @NonNull MenuItem item ) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item ) {
 
         int itemId = item.getItemId();
         if (itemId == R.id.share) { // for debugging use this room id: "yYQK9C19BGy8nt5C4zxY"

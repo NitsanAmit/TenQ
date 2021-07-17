@@ -44,7 +44,9 @@
     <ImageView
         android:id="@+id/icon_export_room"
         style="@style/system_icon"
-        android:src="@drawable/ic_export" />
+        android:src="@drawable/ic_export"
+        android:alpha="0.75"
+        />
 
     <ImageView
         android:id="@+id/icon_delete_room"

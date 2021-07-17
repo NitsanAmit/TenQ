@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.ui.adapters.viewholders.ExistingRoomViewHolder;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
 
 import org.jetbrains.annotations.NotNull;

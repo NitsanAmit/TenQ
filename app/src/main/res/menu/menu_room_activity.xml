@@ -4,20 +4,23 @@
 
     <item android:title="edit"
         android:id="@+id/edit"
-        android:orderInCategory="100"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
+        android:iconTint="@color/white"
+        app:iconTint="@color/white"
         android:icon="@drawable/ic_pencil"/>
 
     <item android:title="share"
         android:id="@+id/share"
-        android:orderInCategory="100"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
+        android:iconTint="@color/white"
+        app:iconTint="@color/white"
         android:icon="@drawable/ic_share"/>
 
     <item android:title="settings"
         android:id="@+id/settings"
-        android:orderInCategory="100"
         app:showAsAction="ifRoom"
+        android:iconTint="@color/white"
+        app:iconTint="@color/white"
         android:icon="@drawable/ic_settings"/>
 
 </menu>

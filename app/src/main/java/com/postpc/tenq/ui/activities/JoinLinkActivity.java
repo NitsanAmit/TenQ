@@ -51,7 +51,7 @@ public class JoinLinkActivity extends TenQActivity {
 
     private void startRoomActivity(Room room) {
         Intent intent = new Intent(JoinLinkActivity.this, RoomActivity.class);
-        intent.putExtra("roomId", room.getId());
+        intent.putExtra("room", room);
         startActivity(intent);
         finish();
     }
