@@ -22,9 +22,9 @@ public class Playlist extends SpotifyEntity implements Serializable {
     boolean isCollaborative;
 
     @SerializedName("tracks")
-    TracksPage tracks;
+    Page<Track> tracks;
 
-    public TracksPage getTracks() {
+    public Page<Track> getTracks() {
         return tracks;
     }
 }

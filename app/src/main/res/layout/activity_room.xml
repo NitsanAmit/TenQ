@@ -21,16 +21,16 @@
         android:orientation="vertical">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_join_with_id"
-            android:contentDescription="@string/aria_join_with_id"
+            android:id="@+id/fab_export_playlist"
+            android:contentDescription="@string/aria_export_playlist"
             android:src="@drawable/ic_export"
             style="@style/fab"
             />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_scan_qr"
+            android:id="@+id/fab_add_song"
             android:backgroundTint="@color/primary"
-            android:contentDescription="@string/aria_scan_qr"
+            android:contentDescription="@string/aria_add_song"
             android:src="@drawable/ic_add"
             style="@style/fab"
             />
