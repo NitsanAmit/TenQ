@@ -23,4 +23,7 @@
     <string name="join">JOIN</string>
     <string name="insert_room_id">Insert Room ID</string>
     <string name="user_list">Users list:</string>
+    <string name="add">Add</string>
+    <string name="aria_add_song">Add new song</string>
+    <string name="aria_export_playlist">Export playlist</string>
 </resources>

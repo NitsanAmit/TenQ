@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class Track extends SpotifyEntity implements Serializable {
 
@@ -14,7 +15,7 @@ public class Track extends SpotifyEntity implements Serializable {
     int durationMs;
 
     @SerializedName("artists")
-    Artist[] artists;
+    List<Artist> artists;
 
     @SerializedName("album")
     Album album;
@@ -27,7 +28,7 @@ public class Track extends SpotifyEntity implements Serializable {
 
     boolean inUserLibrary;
 
-    public Artist[] getArtists() {
+    public List<Artist> getArtists() {
         return artists;
     }
 

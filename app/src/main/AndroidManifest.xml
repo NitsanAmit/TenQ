@@ -21,7 +21,7 @@
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
-        <activity android:name=".ui.activities.SongSearchActivity" />
+        <activity android:name=".ui.activities.SongSearchActivity" android:label="Search songs"/>
         <activity android:name=".ui.activities.RoomSettingsActivity" />
         <activity android:name=".ui.activities.RoomActivity" />
         <activity android:name=".ui.activities.JoinQrActivity" />

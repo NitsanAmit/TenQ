@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
-public class TracksPage implements Serializable {
+public class Page<T> implements Serializable {
 
     @SerializedName("limit")
     int limit;
@@ -26,9 +26,9 @@ public class TracksPage implements Serializable {
     String previous;
 
     @SerializedName("items")
-    List<PlaylistTrack> items;
+    List<T> items;
 
-    public List<PlaylistTrack> getItems() {
+    public List<T> getItems() {
         return items;
     }
 

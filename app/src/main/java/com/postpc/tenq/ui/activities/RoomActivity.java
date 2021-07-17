@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -75,6 +76,7 @@ public class RoomActivity extends TenQActivity {
         });
 
         itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
+        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class)));
     }
 
     /** inflate the menu */
