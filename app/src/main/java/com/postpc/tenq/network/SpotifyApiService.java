@@ -47,4 +47,8 @@ public interface SpotifyApiService {
     @PUT("playlists/{playlist_id}/tracks")
     Call<Void> reorderPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> details);
 
+    @POST("playlists/{playlist_id}/tracks")
+    Call<Void> addTrackToPlaylist(@Path("playlist_id") String playlistId, @Query("uris") String trackId);
+
+
 }

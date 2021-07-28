@@ -1,6 +1,7 @@
 package com.postpc.tenq.ui.activities;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,14 +14,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivitySongSearchBinding;
-import com.postpc.tenq.ui.listeners.PagingScrollListener;
+import com.postpc.tenq.models.Room;
 import com.postpc.tenq.ui.adapters.SongSearchAdapter;
+import com.postpc.tenq.ui.listeners.PagingScrollListener;
 import com.postpc.tenq.viewmodels.SongSearchActivityViewModel;
 
 public class SongSearchActivity extends TenQActivity {
 
     private ActivitySongSearchBinding binding;
     private SongSearchActivityViewModel model;
+    private Room room;
 
 
     @Override
@@ -29,6 +32,10 @@ public class SongSearchActivity extends TenQActivity {
         binding = ActivitySongSearchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         model = new ViewModelProvider(this).get(SongSearchActivityViewModel.class);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            room = (Room) extras.getSerializable("room");
+        }
         setSearchSongRecycler();
     }
 
@@ -60,12 +67,18 @@ public class SongSearchActivity extends TenQActivity {
     }
 
     private void setSearchSongRecycler() {
-        SongSearchAdapter adapter = new SongSearchAdapter(track -> model.addTrackToRoomPlaylist(null, track), binding.progressLoadingMore); //TODO pass room
+        SongSearchAdapter adapter = new SongSearchAdapter(track -> model.addTrackToRoomPlaylist(getAuthService().getCurrentUser(), room, track), binding.progressLoadingMore);
         model.getResults().observe(this, adapter::submitList);
 
         binding.recyclerSongs.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
         binding.recyclerSongs.addOnScrollListener(new PagingScrollListener(model::loadNextPage, binding.progressLoadingMore));
         binding.recyclerSongs.setAdapter(adapter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        startActivity(new Intent(SongSearchActivity.this, RoomActivity.class).putExtra("room", room));
+        super.onBackPressed();
     }
 
 }

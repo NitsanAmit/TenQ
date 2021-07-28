@@ -2,15 +2,19 @@ package com.postpc.tenq.viewmodels;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.postpc.tenq.models.Playlist;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.models.SearchResult;
 import com.postpc.tenq.models.Track;
+import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
+import com.postpc.tenq.ui.activities.ExistingRoomsActivity;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +22,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
@@ -89,8 +95,19 @@ public class SongSearchActivityViewModel extends ViewModel {
 
     }
 
-    public void addTrackToRoomPlaylist(Room room, Track track) {
-        //TODO implement
+    public void addTrackToRoomPlaylist(User user, Room room, Track track) {
+        SpotifyClient.getClient().addTrackToPlaylist(room.getPlaylist().getId(), track.getUri()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                    // todo - should go back to room activity or stay in search activity
+                    // todo notify added song to adapter
+                }
+
+                @Override
+                public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                    Log.e("SongSearchActivityViewModel", "Can't add track to playlist " + track.getUri(), t);
+                }
+            });
     }
 }
 

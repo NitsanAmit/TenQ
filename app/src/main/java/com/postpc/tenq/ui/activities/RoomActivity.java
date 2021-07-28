@@ -76,7 +76,7 @@ public class RoomActivity extends TenQActivity {
 
     private void initRecyclerViewAndLoadPlaylist() {
         getSupportActionBar().setTitle(room.getName());
-        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class)));
+        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class).putExtra("room", room)));
         // Set the layout manager
         binding.recyclerTracks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 
@@ -148,4 +148,6 @@ public class RoomActivity extends TenQActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 }
