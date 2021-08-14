@@ -6,7 +6,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.models.User;
@@ -36,7 +35,6 @@ public class MainActivity extends TenQActivity {
         startSpotifyAuthFlow();
 
     }
-
     private void startRoomsActivity() {
         startActivity(new Intent(this, ExistingRoomsActivity.class));
         finish();
@@ -105,9 +103,4 @@ public class MainActivity extends TenQActivity {
                 });
     }
 
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        recorder.stopRecorder();
-//    }
 }
