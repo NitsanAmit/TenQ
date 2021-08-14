@@ -48,6 +48,7 @@ public class RecorderService {
                     //  respectively instead of changing the volume using the amplitude value
                     if (abs(currentAmplitude - prevAmplitude) > (double) (32767 / maxVolume)) {
                         int newVolume = (int) (( currentAmplitude / 32767 ) * maxVolume);
+                        // TODO: add limit so music won't shut down when there are no noises
                         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0);
                         android.util.Log.e("[volume]", String.valueOf(newVolume));
                     }
