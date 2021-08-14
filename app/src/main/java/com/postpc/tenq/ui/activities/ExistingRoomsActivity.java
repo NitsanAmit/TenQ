@@ -167,12 +167,14 @@ public class ExistingRoomsActivity extends TenQActivity {
                 Toast.makeText(ExistingRoomsActivity.this, "close clicked!", Toast.LENGTH_SHORT).show();
             }
         };
+
         View.OnClickListener itemClickListener = v -> {
             int itemPosition = binding.recyclerExistingRooms.getChildLayoutPosition(v);
             Intent intent = new Intent(this, RoomActivity.class);
             intent.putExtra("room", rooms.get(itemPosition));
             startActivity(intent);
         };
+
         ExistingRoomsAdapter adapter = new ExistingRoomsAdapter(
                 rooms != null ? rooms : new ArrayList<>(),
                 actionListener,
