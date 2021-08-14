@@ -1,7 +1,9 @@
 package com.postpc.tenq.ui.activities;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,6 +12,7 @@ import android.widget.Toast;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +23,7 @@ import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.services.RecorderService;
 import com.postpc.tenq.ui.listeners.IOnDragStartListener;
 import com.postpc.tenq.ui.listeners.PagingScrollListener;
 import com.postpc.tenq.ui.adapters.TracksAdapter;
@@ -35,6 +39,7 @@ public class RoomActivity extends TenQActivity {
     private ActivityRoomBinding binding;
     private ItemTouchHelper itemTouchHelper;
     private Room room;
+    private static RecorderService recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +58,27 @@ public class RoomActivity extends TenQActivity {
             }
         }
         initRecyclerViewAndLoadPlaylist();
+
+        recorder = new RecorderService(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 10);
+
+        } else {
+            recorder.startRecorder();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 10) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                recorder.startRecorder();
+            }else{
+                Log.e("[RECORD_AUDIO]", "Permission denied");
+            }
+        }
     }
 
     private void fetchRoomFromFirestore(String roomId) {
