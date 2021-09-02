@@ -10,6 +10,7 @@ public class Room implements Serializable {
     private String id;
     private String name;
     private boolean active;
+    // private boolean userActionsAllowed; TODO Noam
     private long creationTime;
     private User host;
     private List<User> guests;

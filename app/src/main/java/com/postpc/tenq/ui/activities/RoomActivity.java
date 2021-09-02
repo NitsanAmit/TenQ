@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
+import com.postpc.tenq.core.TenQApplication;
 import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.services.RecorderService;
@@ -39,7 +40,9 @@ public class RoomActivity extends TenQActivity {
     private ActivityRoomBinding binding;
     private ItemTouchHelper itemTouchHelper;
     private Room room;
-    private static RecorderService recorder;
+    private RecorderService recorder; //TODO Noam should not be static
+    //1 - make it not static here
+    // 2 - move it to the application class, and then it will outlive the activity, so you don't need to instantiate it every time the activity starts
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,13 +62,9 @@ public class RoomActivity extends TenQActivity {
         }
         initRecyclerViewAndLoadPlaylist();
 
-        recorder = new RecorderService(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-
+        this.recorder = ((TenQApplication) getApplication()).getRecorderService();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) { //TODO NOAM only if sound awareness is on
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 10);
-
-        } else {
-            recorder.startRecorder();
         }
     }
 
@@ -173,5 +172,17 @@ public class RoomActivity extends TenQActivity {
             Toast.makeText(this, "edit Clicked", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //this.recorder.startRecorder(); TODO NOAM only call this is if the user enabled sound awareness...
+    }
+
+    @Override
+    protected void onStop() {
+        //this.recorder.stopRecorder(); TODO NOAM only call this is if the user enabled sound awareness...
+        super.onStop();
     }
 }
