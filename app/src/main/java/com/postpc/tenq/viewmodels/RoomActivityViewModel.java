@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.postpc.tenq.models.Page;
 import com.postpc.tenq.models.PlaylistTrack;
+import com.postpc.tenq.models.Track;
 import com.postpc.tenq.network.SpotifyClient;
 
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -41,11 +43,28 @@ public class RoomActivityViewModel extends ViewModel {
     public void removeTrack(int position) {
         List<PlaylistTrack> currentTracksList = tracks.getValue();
         if (currentTracksList == null) return;
-        currentTracksList.remove(position);
+        PlaylistTrack track = currentTracksList.get(position);
+        Map<String, Object> tracksBody = new HashMap<>();
+        tracksBody.put("tracks", new Track[]{track.getTrack()});
+        SpotifyClient
+                .getClient()
+                .removeTrackFromPlaylist(playlistId, tracksBody)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                        if (response.code() == 200) {
+                            currentTracksList.remove(position);
+                            // The list reference must be changed for the list adapter to notify the changes
+                            ArrayList<PlaylistTrack> newList = new ArrayList<>(currentTracksList);
+                            tracks.postValue(newList);
+                        }
+                    }
 
-        // The list reference must be changed for the list adapter to notify the changes
-        ArrayList<PlaylistTrack> newList = new ArrayList<>(currentTracksList);
-        tracks.postValue(newList);
+                    @Override
+                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                        Log.e("RoomActivityViewModel", t.getMessage(), t);
+                    }
+                });
     }
 
     public void loadNextPage() {

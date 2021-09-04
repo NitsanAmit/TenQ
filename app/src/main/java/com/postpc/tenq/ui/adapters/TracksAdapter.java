@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.ListAdapter;
 import com.bumptech.glide.Glide;
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.PlaylistTrack;
+import com.postpc.tenq.models.Room;
 import com.postpc.tenq.models.Track;
+import com.postpc.tenq.models.User;
 import com.postpc.tenq.ui.adapters.viewholders.TrackViewHolder;
 import com.postpc.tenq.ui.helpers.PlaylistTracksDiffItemCallback;
 import com.postpc.tenq.ui.listeners.IOnDragStartListener;
@@ -27,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
@@ -41,13 +44,17 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
     private final ITrackActionListener actionListener;
     private final IOnDragStartListener dragStartListener;
     private final ProgressBar progressBar;
+    private final Room room;
+    private final User currentUser;
     private boolean binding;
 
-    public TracksAdapter(ITrackActionListener actionListener, IOnDragStartListener dragStartListener, ProgressBar progressLoading) {
+    public TracksAdapter(ITrackActionListener actionListener, IOnDragStartListener dragStartListener, ProgressBar progressLoading, Room room, User currentUser) {
         super(new PlaylistTracksDiffItemCallback());
         this.actionListener = actionListener;
         this.dragStartListener = dragStartListener;
         this.progressBar = progressLoading;
+        this.room = room;
+        this.currentUser = currentUser;
     }
 
     @NonNull
@@ -109,9 +116,17 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
 
     @NotNull
     private String getTrackDescription(PlaylistTrack track) {
-        String addedBy = track.getAddedBy().getName();
-        return !TextUtils.isEmpty(addedBy)
-                ? String.format("%s added at %s", addedBy, dateFormat.format(track.getAddedAt()))
+        String addedById = track.getAddedBy().getId();
+        AtomicReference<String> addedByName = new AtomicReference<>();
+        if (addedById.equals(currentUser.getId())) {
+            addedByName.set("You");
+        } else if (addedById.equals(room.getHost().getId())) {
+            addedByName.set(room.getHost().getName());
+        }else {
+            room.getGuests().stream().filter(g -> g.getId().equals(addedById)).findFirst().ifPresent(user -> addedByName.set(user.getName()));
+        }
+        return !TextUtils.isEmpty(addedByName.get())
+                ? String.format("%s added at %s", addedByName.get(), dateFormat.format(track.getAddedAt()))
                 : String.format("Added %s", dateFormat.format(track.getAddedAt()));
     }
 

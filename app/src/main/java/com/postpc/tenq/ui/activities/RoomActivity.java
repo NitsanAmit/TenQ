@@ -109,7 +109,7 @@ public class RoomActivity extends TenQActivity {
         ITrackActionListener listener = new TrackActionListener(this::setTrackLiked);
         IOnDragStartListener onDragStartListener = viewHolder -> itemTouchHelper.startDrag(viewHolder);
         // Create the recycler view adapter
-        TracksAdapter adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore);
+        TracksAdapter adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore, room, getAuthService().getCurrentUser());
 
         // Get the activity's view model
         RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);

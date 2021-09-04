@@ -13,6 +13,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.POST;
@@ -46,5 +47,8 @@ public interface SpotifyApiService {
 
     @PUT("playlists/{playlist_id}/tracks")
     Call<Void> reorderPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> details);
+
+    @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
+    Call<Void> removeTrackFromPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> tracks);
 
 }
