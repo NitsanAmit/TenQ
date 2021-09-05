@@ -322,6 +322,7 @@ public class RoomActivity extends TenQActivity {
         super.onResume();
         binding.iconPlay.setClickable(false);
         RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);
+        // Connect to the user's Spotify app on their phone.
         SpotifyAppRemote.connect(this, connectionParams, new Connector.ConnectionListener() {
             public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                 model.connectPlayerService(spotifyAppRemote);

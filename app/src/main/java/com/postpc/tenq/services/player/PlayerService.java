@@ -27,7 +27,7 @@ public class PlayerService implements IPlayerService {
         this.spotifyAppRemote = spotifyAppRemote;
         this.onPlayerError = onPlayerError;
 
-        // Get current state
+        // Get the current player state, so we have it immediately available for the initial activity state
         spotifyAppRemote.getPlayerApi().getPlayerState().setResultCallback(stateCallback::onEvent);
 
         // Subscribe to player state
@@ -39,6 +39,7 @@ public class PlayerService implements IPlayerService {
                 .getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(data -> {
+                    // If the track changed, reload the track cover image
                     if (data.track != null && !data.track.uri.equals(currentSongUri)) {
                         currentSongUri = data.track.uri;
                         spotifyAppRemote.getImagesApi().getImage(data.track.imageUri).setResultCallback(trackImageCallback);
@@ -67,7 +68,6 @@ public class PlayerService implements IPlayerService {
 
     }
 
-    //TODO getUserAPI remove songs from here!
     @Override
     public void disconnect() {
         SpotifyAppRemote.disconnect(spotifyAppRemote);
@@ -79,7 +79,7 @@ public class PlayerService implements IPlayerService {
     }
 
     @Override
-    public void play(String uri) {
+    public void play(String uri) { // Plays a new context - requires a playlist / song uri
         this.spotifyAppRemote
                 .getPlayerApi()
                 .play(uri)
@@ -87,7 +87,7 @@ public class PlayerService implements IPlayerService {
     }
 
     @Override
-    public void resume() {
+    public void resume() { // Resumes the current context currently playing song/playlist
         this.spotifyAppRemote
                 .getPlayerApi()
                 .resume()

@@ -170,8 +170,11 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
     }
 
     public void connectPlayerService(SpotifyAppRemote spotifyAppRemote){
+        // Connection went smoothly on Spotify's end - so the user has the app and is authenticated
         loggedInSpotify = true;
         hasSpotifyInstalled = true;
+
+        // Attach the play service
         playerService.connect(
                 spotifyAppRemote,
                 playerState::postValue,
