@@ -71,6 +71,17 @@ public class PlayerService implements IPlayerService {
     @Override
     public void disconnect() {
         SpotifyAppRemote.disconnect(spotifyAppRemote);
+        if (playerStateSubscription != null && !playerStateSubscription.isCanceled()) {
+            playerStateSubscription.cancel();
+            playerStateSubscription = null;
+        }
+        if (playerContextSubscription != null && !playerContextSubscription.isCanceled()) {
+            playerContextSubscription.cancel();
+            playerContextSubscription = null;
+        }
+        this.spotifyAppRemote = null;
+        this.onPlayerError = null;
+        this.currentSongUri = null;
     }
 
     @Override
