@@ -1,5 +1,6 @@
 package com.postpc.tenq.viewmodels;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -10,6 +11,17 @@ import com.postpc.tenq.models.Page;
 import com.postpc.tenq.models.PlaylistTrack;
 import com.postpc.tenq.models.Track;
 import com.postpc.tenq.network.SpotifyClient;
+import com.postpc.tenq.services.player.IAudioPlayer;
+import com.postpc.tenq.services.player.IPlayerService;
+import com.postpc.tenq.services.player.PlayerError;
+import com.postpc.tenq.services.player.PlayerErrorType;
+import com.postpc.tenq.services.player.PlayerService;
+import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.android.appremote.api.error.AuthenticationFailedException;
+import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp;
+import com.spotify.android.appremote.api.error.NotLoggedInException;
+import com.spotify.protocol.types.PlayerContext;
+import com.spotify.protocol.types.PlayerState;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -24,12 +36,28 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RoomActivityViewModel extends ViewModel {
+public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
 
     public static final int PAGE_SIZE = 30;
     private final AtomicInteger offset = new AtomicInteger(0);
     private MutableLiveData<List<PlaylistTrack>> tracks;
     private String playlistId;
+    private final MutableLiveData<PlayerState> playerState;
+    private final MutableLiveData<PlayerContext> playerContext;
+    private final MutableLiveData<PlayerError> playerError;
+    private final MutableLiveData<Bitmap> playerBitmap;
+    private final IPlayerService playerService;
+    private boolean hasSpotifyInstalled;
+    private boolean loggedInSpotify;
+
+    public RoomActivityViewModel() {
+        super();
+        playerService = new PlayerService();
+        playerState = new MutableLiveData<>(null);
+        playerContext = new MutableLiveData<>(null);
+        playerError = new MutableLiveData<>(null);
+        playerBitmap = new MutableLiveData<>(null);
+    }
 
     public LiveData<List<PlaylistTrack>> getTracks(String playlistId) {
         this.playlistId = playlistId;
@@ -159,4 +187,105 @@ public class RoomActivityViewModel extends ViewModel {
                     }
                 });
     }
+
+    public void connectPlayerService(SpotifyAppRemote spotifyAppRemote){
+        // Connection went smoothly on Spotify's end - so the user has the app and is authenticated
+        loggedInSpotify = true;
+        hasSpotifyInstalled = true;
+
+        // Attach the play service
+        playerService.connect(
+                spotifyAppRemote,
+                playerState::postValue,
+                playerContext::postValue,
+                playerBitmap::postValue,
+                playerError::postValue
+        );
+    }
+
+    public void disconnectPlayerService(){
+        playerService.disconnect();
+    }
+
+    public void spotifyAppRemoteConnectionFailure(Throwable throwable) {
+        hasSpotifyInstalled = true;
+        loggedInSpotify = true;
+        if (throwable instanceof CouldNotFindSpotifyApp) {
+            hasSpotifyInstalled = false;
+        } else if (throwable instanceof NotLoggedInException || throwable instanceof AuthenticationFailedException) {
+            loggedInSpotify = false;
+        }
+        Log.e("RoomActivity", throwable.getMessage(), throwable);
+    }
+
+    public LiveData<PlayerState> getPlayerState() {
+        return playerState;
+    }
+
+    public LiveData<PlayerContext> getPlayerContext() {
+        return playerContext;
+    }
+
+    public LiveData<Bitmap> getPlayerBitmap() {
+        return playerBitmap;
+    }
+
+    public LiveData<PlayerError> getPlayerError() {
+        return playerError;
+    }
+
+    /**
+     * MEDIA PLAYING DELEGATION FUNCTIONS
+     */
+    private boolean isPlayerConnected() {
+        if (!hasSpotifyInstalled) {
+            this.playerError.postValue(new PlayerError(PlayerErrorType.SPOTIFY_NOT_INSTALLED, null));
+        } else if (!loggedInSpotify) {
+            this.playerError.postValue(new PlayerError(PlayerErrorType.SPOTIFY_NOT_AUTHENTICATED, null));
+        }
+        return playerService.isConnected();
+    }
+
+    @Override
+    public void play(String uri) {
+        if (!isPlayerConnected()) return;
+        PlayerContext playerContextValue = this.playerContext.getValue();
+        if (playerContextValue == null || playerContextValue.uri == null || !playerContextValue.uri.equals(uri)){
+            playerService.play(uri);
+        } else {
+            playerService.resume();
+        }
+    }
+
+    @Override
+    public void resume() {
+        playerService.resume();
+    }
+
+    @Override
+    public void pause() {
+        if (!isPlayerConnected()) return;
+        playerService.pause();
+    }
+
+    @Override
+    public void next() {
+        if (!isPlayerConnected()) return;
+        playerService.next();
+    }
+
+    @Override
+    public void previous() {
+        if (!isPlayerConnected()) return;
+        playerService.previous();
+    }
+
+    @Override
+    public void seek(int progress) {
+        if (!isPlayerConnected()) return;
+        playerService.seek(progress);
+    }
+
+
+
 }
