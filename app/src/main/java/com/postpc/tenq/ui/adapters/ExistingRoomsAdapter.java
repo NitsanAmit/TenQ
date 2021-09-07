@@ -14,10 +14,20 @@ import com.postpc.tenq.ui.listeners.IRoomActionListener;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class ExistingRoomsAdapter extends RecyclerView.Adapter<ExistingRoomViewHolder> {
 
+    private static final SimpleDateFormat dateFormat;
+
+    static {
+        dateFormat = new SimpleDateFormat("dd/MM/yy, hh:mm", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getDefault());
+    }
     private final List<Room> items;
     private final IRoomActionListener actionListener;
     private final View.OnClickListener onItemClick;
@@ -50,7 +60,7 @@ public class ExistingRoomsAdapter extends RecyclerView.Adapter<ExistingRoomViewH
         Room room = this.items.get(position);
         holder.roomName.setText(room.getName());
         holder.roomDescription.setText(String.format("Opened by %s at %s",
-                room.getHost().getName(), room.getCreationTime()));
+                room.getHost().getName(), dateFormat.format(new Date(room.getCreationTime()))));
         if (room.isActive()) {
             holder.indicator.setVisibility(View.VISIBLE);
             holder.closeRoomIcon.setVisibility(View.VISIBLE);
