@@ -7,18 +7,19 @@
     android:padding="16dp">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:elevation="12dp"
         app:cardCornerRadius="25dp"
         android:layout_marginEnd="16dp"
         >
+
         <ImageView
             android:id="@+id/img_user_profile"
-            android:layout_height="48dp"
             android:layout_width="match_parent"
-            android:src="@color/indicator_good"
-            android:scaleType="centerCrop"/>
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@color/indicator_good" />
     </androidx.cardview.widget.CardView>
     <LinearLayout
         android:layout_width="0dp"
@@ -37,17 +38,5 @@
                 style="@style/item_title"
                 android:text="Nitsan Amit" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/txt_user_join_date"
-            style="@style/item_description"
-            android:text="Joined 15.3.21" />
     </LinearLayout>
-
-    <!--Action Icons-->
-    <ImageView
-        android:id="@+id/icon_disable_user"
-        style="@style/system_icon"
-        android:src="@drawable/ic_close" />
-
 </LinearLayout>

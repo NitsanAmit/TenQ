@@ -19,8 +19,6 @@ public class UserNameViewHolder extends RecyclerView.ViewHolder{
     public UserNameViewHolder(@NonNull @NotNull View itemView) {
         super(itemView);
          userName = itemView.findViewById(R.id.txt_user_name);
-         deleteUser = itemView.findViewById(R.id.icon_disable_user);
-
     }
 
 }

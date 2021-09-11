@@ -54,6 +54,7 @@ public class RoomActivity extends TenQActivity {
     private ActivityRoomBinding binding;
     private ItemTouchHelper itemTouchHelper;
     private Room room;
+    private TracksAdapter adapter;
     private RecorderService recorder; //TODO Noam should not be static
     //1 - make it not static here
     // 2 - move it to the application class, and then it will outlive the activity, so you don't need to instantiate it every time the activity starts
@@ -226,7 +227,7 @@ public class RoomActivity extends TenQActivity {
 
     private void initRecyclerViewAndLoadPlaylist() {
         if (getSupportActionBar() != null) getSupportActionBar().setTitle(room.getName());
-        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class)));
+        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class).putExtra("room", room)));
         // Set the layout manager
         binding.recyclerTracks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 
@@ -234,7 +235,7 @@ public class RoomActivity extends TenQActivity {
         ITrackActionListener listener = new TrackActionListener(this::setTrackLiked);
         IOnDragStartListener onDragStartListener = viewHolder -> itemTouchHelper.startDrag(viewHolder);
         // Create the recycler view adapter
-        TracksAdapter adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore, room, getAuthService().getCurrentUser());
+        adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore, room, getAuthService().getCurrentUser());
 
         // Get the activity's view model
         RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);
