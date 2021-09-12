@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.models.User;
@@ -15,6 +17,8 @@ import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -79,6 +83,13 @@ public class MainActivity extends TenQActivity {
         }
     }
 
+    private void registerUser() {
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(getAuthService().getCurrentUserId())
+                .set(new HashMap<>(), SetOptions.merge());
+    }
+
     private void getUserProfile() {
         SpotifyClient
                 .getClient()
@@ -91,6 +102,7 @@ public class MainActivity extends TenQActivity {
                             if (profile == null) return; //TODO error
                             Log.d("LoginActivity", "Got profile!\n" + profile.toString());
                             MainActivity.this.getAuthService().saveCurrentUser(profile);
+                            registerUser();
                             startRoomsActivity();
                             finish();
                         }

@@ -43,7 +43,6 @@ public class ExistingRoomsActivity extends TenQActivity {
         binding = ActivityExistingRoomsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         //TODO move all the firebase logic to a viewmodel
-        registerUser();
         getUserExistingRooms();
 
         binding.fabCreateRoom.setOnClickListener(v -> {
@@ -119,13 +118,6 @@ public class ExistingRoomsActivity extends TenQActivity {
                 .collection("users")
                 .document(getAuthService().getCurrentUserId())
                 .update("roomIds", FieldValue.arrayUnion(roomId));
-    }
-
-    private void registerUser() {
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(getAuthService().getCurrentUserId())
-                .set(new HashMap<>(), SetOptions.merge());
     }
 
     private void getUserExistingRooms() {
