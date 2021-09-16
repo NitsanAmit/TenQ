@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivityExistingRoomsBinding;
@@ -23,6 +24,7 @@ import com.postpc.tenq.network.SpotifyClient;
 import com.postpc.tenq.ui.adapters.ExistingRoomsAdapter;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
