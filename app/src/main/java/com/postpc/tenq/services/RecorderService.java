@@ -1,23 +1,31 @@
 package com.postpc.tenq.services;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
-import android.util.Log;
-import android.os.Handler;
+
+import java.util.Set;
 
 import static java.lang.Math.abs;
-import static java.lang.Math.exp;
 
 public class RecorderService {
 
-    public static final int MILLIS = 6000;
     private static double mEMA = 0.0;
-    static final private double EMA_FILTER = 0.6;
+    private static final int MILLIS = 6000;
+    private static final double EMA_FILTER = 0.6;
+    private static final int MAX_AMPLITUDE = 32767;
 
     private MediaRecorder mRecorder;
     private static Thread runner;
-    private boolean isRecorderOn = false; // need to be true for recording
+    // true if user set the recording option on, needs bluetooth connection in order to be active
+    private boolean userSetRecorderOn;
+    private boolean isRecorderOn;
+    private boolean deviceConnected;
     private double prevAmplitude;
     private final AudioManager audioManager;
 
@@ -25,8 +33,14 @@ public class RecorderService {
 
         this.audioManager = (AudioManager) applicationContext.getSystemService(Context.AUDIO_SERVICE);
         this.prevAmplitude = getAmplitude();
+        this.userSetRecorderOn = true;
+        this.isRecorderOn = true;
+        runner = null;
 
-        if (runner == null && isRecorderOn)
+        Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+        this.deviceConnected = pairedDevices.size() > 0;
+
+        if (runner == null)
         {
             runner = new Thread(() -> {
                 while (runner != null)
@@ -42,33 +56,47 @@ public class RecorderService {
                     double currentAmplitude = getAmplitude();
                     int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
-                    // TODO: maybe change it to decreasing / increasing by 1 each time the amplitude is lower / higher
-                    //  respectively instead of changing the volume using the amplitude value
-                    if (abs(currentAmplitude - prevAmplitude) > (double) (32767 / maxVolume)) {
-                        int newVolume = (int) (( currentAmplitude / 32767 ) * maxVolume);
-
-                        // add lower bound so music won't shut down when there are no noises
-                        if (newVolume > 4) {
-                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0);
-                        }
-                        android.util.Log.e("[volume]", String.valueOf(newVolume));
+                    if (abs(currentAmplitude - prevAmplitude) > (double) (MAX_AMPLITUDE / maxVolume)) {
+                        int newVolume = (int) (( currentAmplitude / MAX_AMPLITUDE ) * maxVolume);
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (Math.max(newVolume, 4)), 0);
                     }
                     prevAmplitude = currentAmplitude;
-                    //mHandler.post(runner);
                 }
             });
             runner.start();
         }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+
+                if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                    deviceConnected = true;
+                    if (userSetRecorderOn) {
+                        startRecorder();
+                    }
+                } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                    deviceConnected = false;
+                    if (userSetRecorderOn) { // if the user didn't want the recorder to be on there is nothing to stop
+                        stopRecorder();
+                    }
+                }
+            }
+        };
+        applicationContext.registerReceiver(mReceiver, filter);
     }
 
-    private final Runnable updater = new Runnable(){
-        public void run(){
-            double db = soundDb(1);
-        }
-    };
-    private final Handler mHandler = new Handler();
-
     public void startRecorder(){
+
+        android.util.Log.e("[recorder]", "start recording");
+        isRecorderOn = true;
+
         if (mRecorder == null)
         {
             mRecorder = new MediaRecorder();
@@ -97,11 +125,15 @@ public class RecorderService {
     }
 
     public void stopRecorder() {
+        android.util.Log.e("[recorder]", "stop recording");
+        isRecorderOn = false;
+
         if (mRecorder != null) {
             mRecorder.stop();
             mRecorder.release();
             mRecorder = null;
         }
+        runner = null;
     }
 
     public double soundDb(double ampl){
@@ -121,16 +153,20 @@ public class RecorderService {
         return mEMA;
     }
 
-    public void setRecorderOn(boolean isRecorderOn) {
-        this.isRecorderOn = isRecorderOn;
+    public void setUserSetRecorderOn(boolean userSetRecorderOn) {
+        this.userSetRecorderOn = userSetRecorderOn;
     }
 
-    public boolean getRecorderOn() {
-        return this.isRecorderOn;
+    public boolean isUserSetRecorderOn() {
+        return this.userSetRecorderOn;
     }
 
-    public void turnRecorderOn() {
-        this.isRecorderOn = true;
+    public boolean isDeviceConnected() {
+        return deviceConnected;
+    }
+
+    public boolean isRecorderOn() {
+        return isRecorderOn;
     }
 }
 
