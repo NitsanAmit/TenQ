@@ -15,11 +15,9 @@ public class PagingScrollListener extends RecyclerView.OnScrollListener {
 
     private int cursor = 0;
     private final IOnLoadNextPageListener listener;
-    private final ProgressBar progressBar;
 
-    public PagingScrollListener(IOnLoadNextPageListener listener, ProgressBar progressBar) {
+    public PagingScrollListener(IOnLoadNextPageListener listener) {
         this.listener = listener;
-        this.progressBar = progressBar;
     }
 
     @Override
@@ -32,7 +30,6 @@ public class PagingScrollListener extends RecyclerView.OnScrollListener {
         int current = layoutManager.findLastVisibleItemPosition();
         if (current != cursor && current == itemCount - 1 && adapter != null) {
             cursor = current;
-            progressBar.setVisibility(View.VISIBLE);
             listener.loadMore();
         }
     }

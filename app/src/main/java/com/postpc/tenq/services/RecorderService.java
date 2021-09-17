@@ -85,15 +85,18 @@ public class RecorderService {
                 mRecorder.prepare();
             }catch (java.io.IOException ioe) {
                 android.util.Log.e("[Recorder]", "IOException: " + android.util.Log.getStackTraceString(ioe));
-
+                return;
             }catch (java.lang.SecurityException e) {
                 android.util.Log.e("[Recorder]", "SecurityException: " + android.util.Log.getStackTraceString(e));
+                return;
             }
             try
             {
                 mRecorder.start();
             }catch (java.lang.SecurityException e) {
                 android.util.Log.e("[Recorder]", "SecurityException: " + android.util.Log.getStackTraceString(e));
+            } catch (RuntimeException e) {
+                android.util.Log.e("[Recorder]", "RuntimeException: " + android.util.Log.getStackTraceString(e));
             }
 
         }
@@ -144,14 +147,18 @@ public class RecorderService {
     }
 
     public double getAmplitude() {
-        if (mRecorder != null)
-            return (mRecorder.getMaxAmplitude());
-        else
+        if (mRecorder != null) {
+            try {
+                return mRecorder.getMaxAmplitude();
+            } catch (IllegalStateException e) {
+                return 0;
+            }
+        } else
             return 0;
 
     }
     public double getAmplitudeEMA() {
-        double amp =  getAmplitude();
+        double amp = getAmplitude();
         mEMA = EMA_FILTER * amp + (1.0 - EMA_FILTER) * mEMA;
         return mEMA;
     }

@@ -38,12 +38,6 @@ public class UserNamesAdapter extends RecyclerView.Adapter<UserNameViewHolder>{
         this.binding = true;
         User currentItem = userItems.get(position);
         holder.userName.setText(currentItem.getName());
-        holder.deleteUser.setOnClickListener(view -> {
-            if (this.binding) return;
-            userItems.remove(currentItem);
-            notifyDataSetChanged();
-            // todo - option 1 remove user from room including fire base and such, option 2 lock user from preventing changes in playist
-        });
         this.binding = false;
     }
 

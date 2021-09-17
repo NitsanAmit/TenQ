@@ -1,7 +1,6 @@
 package com.postpc.tenq.ui.adapters;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,7 +11,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ListAdapter;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.PlaylistTrack;
 import com.postpc.tenq.models.Room;
@@ -79,6 +77,7 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
         } else {
             Glide.with(holder.albumCover).load(R.drawable.ic_music_note).into(holder.albumCover);
         }
+        holder.albumCover.setOnClickListener(v -> actionListener.onTrackPlay(position));
         if (trackData.isInUserLibrary()) {
             holder.emptyLikeIcon.setVisibility(View.GONE);
             holder.emptyLikeIcon.setOnClickListener(null);
@@ -136,14 +135,4 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
     private boolean hasCoverImage(Track trackData) {
         return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().length > 0;
     }
-
-
-    public void swapItems(int fromPosition, int toPosition) {
-        List<PlaylistTrack> items = new ArrayList<>(getCurrentList());
-        Collections.swap(items, fromPosition, toPosition);
-        submitList(items, () -> {
-            notifyItemMoved(fromPosition, toPosition);
-        });
-    }
-
 }

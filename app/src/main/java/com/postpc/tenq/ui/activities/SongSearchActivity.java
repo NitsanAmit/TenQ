@@ -72,9 +72,10 @@ public class SongSearchActivity extends TenQActivity {
     private void setSearchSongRecycler() {
         SongSearchAdapter adapter = new SongSearchAdapter(track -> model.addTrackToRoomPlaylist(getAuthService().getCurrentUser(), room, track), binding.progressLoadingMore);
         model.getResults().observe(this, adapter::submitList);
+        model.getDidAddTracks().observe(this, didAddTracks -> setResult(RESULT_OK, getIntent().putExtra("didAddSongs", didAddTracks)));
 
         binding.recyclerSongs.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-        binding.recyclerSongs.addOnScrollListener(new PagingScrollListener(model::loadNextPage, binding.progressLoadingMore));
+        binding.recyclerSongs.addOnScrollListener(new PagingScrollListener(model::loadNextPage));
         binding.recyclerSongs.setAdapter(adapter);
     }
 

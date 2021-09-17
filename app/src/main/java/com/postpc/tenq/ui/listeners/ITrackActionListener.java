@@ -6,4 +6,6 @@ public interface ITrackActionListener {
 
     void onTrackUnliked(int trackPosition, String trackId);
 
+    void onTrackPlay(int trackPosition);
+
 }

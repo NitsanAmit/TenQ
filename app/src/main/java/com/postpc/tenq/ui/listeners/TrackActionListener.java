@@ -2,11 +2,16 @@ package com.postpc.tenq.ui.listeners;
 
 import android.util.Log;
 
+import com.postpc.tenq.models.PlaylistTrack;
+import com.postpc.tenq.models.Track;
 import com.postpc.tenq.network.SpotifyClient;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -15,9 +20,11 @@ import retrofit2.Response;
 public class TrackActionListener implements ITrackActionListener {
 
     private final BiConsumer<Integer, Boolean> setTrackLikedCallback;
+    private final Consumer<Integer> playTrackCallback;
 
-    public TrackActionListener(BiConsumer<Integer, Boolean> setTrackLiked) {
+    public TrackActionListener(BiConsumer<Integer, Boolean> setTrackLiked, Consumer<Integer> playTrackCallback) {
         this.setTrackLikedCallback = setTrackLiked;
+        this.playTrackCallback = playTrackCallback;
     }
 
     @Override
@@ -54,5 +61,10 @@ public class TrackActionListener implements ITrackActionListener {
                         Log.e("TrackActionListener", "Can't remove track from user library: " + trackId, t);
                     }
                 });
+    }
+
+    @Override
+    public void onTrackPlay(int trackPosition) {
+        playTrackCallback.accept(trackPosition);
     }
 }

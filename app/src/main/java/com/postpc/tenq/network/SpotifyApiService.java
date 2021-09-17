@@ -36,9 +36,6 @@ public interface SpotifyApiService {
     @GET("search")
     Call<SearchResult> searchTracks(@Query("q") String query, @Query("type") String type, @Query("limit") int limit, @Query("offset") int offset);
 
-    @GET("playlists/{playlist_id}")
-    Call<Playlist> getPlaylist(@Path("playlist_id") String playlistId, @Query("fields") String[] fields);
-
     @POST("users/{user_id}/playlists")
     Call<Playlist> createPlaylist(@Path("user_id") String userId, @Body() Map<String, Object> details);
 
@@ -53,6 +50,9 @@ public interface SpotifyApiService {
 
     @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
     Call<Void> removeTrackFromPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> tracks);
+
+    @DELETE("playlists/{playlist_id}/followers")
+    Call<Void> unfollowPlaylist(@Path("playlist_id") String playlistId);
 
     @POST("playlists/{playlist_id}/tracks")
     Call<Void> addTrackToPlaylist(@Path("playlist_id") String playlistId, @Query("uris") String trackUri);

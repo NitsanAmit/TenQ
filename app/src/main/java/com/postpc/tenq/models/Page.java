@@ -35,4 +35,8 @@ public class Page<T> implements Serializable {
     public String getNext() {
         return next;
     }
+
+    public long getTotal() {
+        return total;
+    }
 }

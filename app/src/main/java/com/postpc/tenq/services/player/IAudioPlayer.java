@@ -13,4 +13,6 @@ public interface IAudioPlayer {
     void previous();
 
     void seek(int progress);
+
+    void skipToIndex(String playlistUri, int index);
 }

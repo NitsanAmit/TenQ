@@ -18,6 +18,7 @@ public class TrackViewHolder extends RecyclerView.ViewHolder implements ItemTouc
     public TextView trackName;
     public TextView trackDescription;
     public ImageView albumCover;
+    public ImageView albumCoverOverlay;
     public ImageView fullLikeIcon;
     public ImageView emptyLikeIcon;
     public ImageView reorderIcon;
@@ -28,6 +29,7 @@ public class TrackViewHolder extends RecyclerView.ViewHolder implements ItemTouc
         trackName = itemView.findViewById(R.id.txt_song_name);
         trackDescription = itemView.findViewById(R.id.txt_song_description);
         albumCover = itemView.findViewById(R.id.img_album_cover);
+        albumCoverOverlay = itemView.findViewById(R.id.img_album_cover_overlay);
         fullLikeIcon = itemView.findViewById(R.id.icon_like_full);
         emptyLikeIcon = itemView.findViewById(R.id.icon_like_empty);
         reorderIcon = itemView.findViewById(R.id.icon_reorder);

@@ -42,6 +42,7 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
     private final AtomicInteger offset = new AtomicInteger(0);
     private MutableLiveData<List<PlaylistTrack>> tracks;
     private String playlistId;
+    private final MutableLiveData<Boolean> loadingPage;
     private final MutableLiveData<PlayerState> playerState;
     private final MutableLiveData<PlayerContext> playerContext;
     private final MutableLiveData<PlayerError> playerError;
@@ -49,6 +50,7 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
     private final IPlayerService playerService;
     private boolean hasSpotifyInstalled;
     private boolean loggedInSpotify;
+    private long totalTracksCount;
 
     public RoomActivityViewModel() {
         super();
@@ -57,6 +59,7 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
         playerContext = new MutableLiveData<>(null);
         playerError = new MutableLiveData<>(null);
         playerBitmap = new MutableLiveData<>(null);
+        loadingPage = new MutableLiveData<>(false);
     }
 
     public LiveData<List<PlaylistTrack>> getTracks(String playlistId) {
@@ -66,6 +69,10 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
             loadNextPage();
         }
         return tracks;
+    }
+
+    public LiveData<Boolean> getIsLoadingPage() {
+        return loadingPage;
     }
 
     public void removeTrack(int position) {
@@ -84,6 +91,7 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
                             currentTracksList.remove(position);
                             // The list reference must be changed for the list adapter to notify the changes
                             ArrayList<PlaylistTrack> newList = new ArrayList<>(currentTracksList);
+                            totalTracksCount--;
                             tracks.postValue(newList);
                         }
                     }
@@ -96,7 +104,10 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
     }
 
     public void loadNextPage() {
-        if (playlistId == null) return; // TODO not the best solution...
+        if ((loadingPage.getValue() != null && loadingPage.getValue()) || (long) offset.get() > totalTracksCount || playlistId == null) {
+            return;
+        }
+        loadingPage.setValue(true);
         SpotifyClient
                 .getClient()
                 .getPlaylistTracks(playlistId, PAGE_SIZE, offset.get())
@@ -106,21 +117,31 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
                         if (response.code() == 200) {
                             Page<PlaylistTrack> nextPage = response.body();
                             if (nextPage != null) {
+                                loadingPage.setValue(false);
                                 offset.set(offset.addAndGet(PAGE_SIZE)); // increase the page offset
+                                totalTracksCount = nextPage.getTotal();
                                 checkSavedTracksInPage(nextPage);
                                 return;
                             }
                         }
                         tracks.postValue(new ArrayList<>());
+                        loadingPage.setValue(false);
                     }
 
                     @Override
                     public void onFailure(@NotNull Call<Page<PlaylistTrack>> call, @NotNull Throwable t) {
                         Log.e("RoomActivityViewModel", t.getMessage(), t);
                         tracks.postValue(new ArrayList<>());
+                        loadingPage.setValue(false);
                     }
                 });
 
+    }
+
+    public void reloadList() {
+        tracks.setValue(new ArrayList<>());
+        offset.set(0);
+        loadNextPage();
     }
 
     private void checkSavedTracksInPage(Page<PlaylistTrack> nextPage) {
@@ -286,6 +307,9 @@ public class RoomActivityViewModel extends ViewModel implements IAudioPlayer {
         playerService.seek(progress);
     }
 
-
-
+    @Override
+    public void skipToIndex(String playlistUri, int index) {
+        if (!isPlayerConnected()) return;
+        playerService.skipToIndex(playlistUri, index);
+    }
 }

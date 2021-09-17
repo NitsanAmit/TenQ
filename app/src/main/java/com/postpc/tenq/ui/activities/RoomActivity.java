@@ -20,7 +20,6 @@ import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -54,16 +53,25 @@ import com.spotify.protocol.types.PlayerState;
 
 public class RoomActivity extends TenQActivity {
 
+    private static final int RECORD_REQUEST_CODE = 10;
     private ActivityRoomBinding binding;
     private ItemTouchHelper itemTouchHelper;
     private Room room;
-    private SoundAwarenessService soundAwareness;
-    private ActivityResultLauncher<Intent> launchRoomSettingsActivity;
+    private SoundAwarenessService soundAwarenessService;
     private TrackTouchCallback trackTouchCallback;
     private final ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
             .setRedirectUri(REDIRECT_URI)
             .showAuthView(true)
             .build();
+
+    private final ActivityResultLauncher<Intent> launchRoomSettingsActivity = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            this::onSettingsResult);
+
+    private final ActivityResultLauncher<Intent> songActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), this::onSongsSearchResult);
+
+    private boolean foreignContext = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,33 +92,14 @@ public class RoomActivity extends TenQActivity {
         initRecyclerViewAndLoadPlaylist();
         initPlayer();
 
-        this.soundAwareness = ((TenQApplication) getApplication()).getSoundAwarenessService();
-        if (soundAwareness.getRecorderService().isUserSetRecorderOn() && soundAwareness.getRecorderService().isDeviceConnected() ) {
+        soundAwarenessService = ((TenQApplication) getApplication()).getSoundAwarenessService();
+        if (soundAwarenessService.getRecorderService().isUserSetRecorderOn() && soundAwarenessService.getRecorderService().isDeviceConnected()) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO }, 10);
-            }
-            else {
-                soundAwareness.getRecorderService().startRecorder();
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_REQUEST_CODE);
+            } else {
+                soundAwarenessService.getRecorderService().startRecorder();
             }
         }
-
-        launchRoomSettingsActivity = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent intent = result.getData();
-                        boolean actionsAllowed = room.isUserActionsAllowed();
-                        if (intent != null) {
-                            actionsAllowed = intent.getBooleanExtra("actionsAllowed", false);
-                        }
-                        room.setUserActionsAllowed(actionsAllowed);
-                        trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().getCurrentUser().getId().equals(room.getHost().getId()));
-                        TracksAdapter adapter = ((TracksAdapter) binding.recyclerTracks.getAdapter());
-                        if (adapter != null) {
-                            adapter.notifyDataSetChanged();
-                        }
-                    }
-                });
     }
 
     private void initPlayer() {
@@ -121,8 +110,13 @@ public class RoomActivity extends TenQActivity {
         model.getPlayerBitmap().observe(this, bitmap -> Glide.with(this.binding.imgAlbumCover).load(bitmap).into(this.binding.imgAlbumCover));
         model.getPlayerState().observe(this, getPlayerStateObserver());
         model.getPlayerContext().observe(this, playerContext -> {
-            if (playerContext != null && !playerContext.uri.equals(room.getPlaylist().getUri())) {
-                clearPlayerState(new TrackProgressBar(binding.seekBar));
+            if (playerContext != null) {
+                if (!playerContext.uri.equals(room.getPlaylist().getUri())) {
+                    foreignContext = true;
+                    clearPlayerState(new TrackProgressBar(binding.seekBar));
+                } else {
+                    foreignContext = false;
+                }
             }
         });
         model.getPlayerError().observe(this, playerError -> {
@@ -138,7 +132,7 @@ public class RoomActivity extends TenQActivity {
                 case PLAYBACK_ERROR:
                     if (playerError.getThrowable() != null) {
                         Toast.makeText(this, "Error connecting to Spotify: " + playerError.getThrowable().getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }else {
+                    } else {
                         Toast.makeText(this, "Error connecting to Spotify.", Toast.LENGTH_SHORT).show();
                     }
                     break;
@@ -210,7 +204,9 @@ public class RoomActivity extends TenQActivity {
         TrackProgressBar trackProgressBar = new TrackProgressBar(this.binding.seekBar);
         return playerState -> {
             if (playerState != null && playerState.track != null) {
-                updatePlayerState(playerState, trackProgressBar);
+                if (!foreignContext) {
+                    updatePlayerState(playerState, trackProgressBar);
+                }
             } else {
                 clearPlayerState(trackProgressBar);
             }
@@ -221,11 +217,9 @@ public class RoomActivity extends TenQActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 10) {
-            if (soundAwareness.getRecorderService().isDeviceConnected() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                soundAwareness.getRecorderService().startRecorder();
-            } else {
-                Log.e("[RECORD_AUDIO]", "Permission denied");
+        if (requestCode == RECORD_REQUEST_CODE) {
+            if (soundAwarenessService.getRecorderService().isDeviceConnected() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                soundAwarenessService.getRecorderService().startRecorder();
             }
         }
     }
@@ -252,21 +246,22 @@ public class RoomActivity extends TenQActivity {
 
     private void initRecyclerViewAndLoadPlaylist() {
         if (getSupportActionBar() != null) getSupportActionBar().setTitle(room.getName());
-        binding.fabAddSong.setOnClickListener(v -> startActivity(new Intent(RoomActivity.this, SongSearchActivity.class).putExtra("room", room)));
+        binding.fabAddSong.setOnClickListener(v ->
+                songActivityResultLauncher.launch(new Intent(RoomActivity.this, SongSearchActivity.class).putExtra("room", room)));
         // Set the layout manager
         binding.recyclerTracks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-
-        // Set "Add song to library" action listener (when user clicks the heart icon)
-        ITrackActionListener listener = new TrackActionListener(this::setTrackLiked);
-        IOnDragStartListener onDragStartListener = viewHolder -> itemTouchHelper.startDrag(viewHolder);
-        // Create the recycler view adapter
-        adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore, room, getAuthService().getCurrentUser());
 
         // Get the activity's view model
         RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);
 
+        // Set "Add song to library" action listener (when user clicks the heart icon)
+        ITrackActionListener listener = new TrackActionListener(this::setTrackLiked, index -> model.skipToIndex(room.getPlaylist().getUri(), index));
+        IOnDragStartListener onDragStartListener = viewHolder -> itemTouchHelper.startDrag(viewHolder);
+        // Create the recycler view adapter
+        TracksAdapter adapter = new TracksAdapter(listener, onDragStartListener, binding.progressLoadingMore, room, getAuthService().getCurrentUser());
+
         // Set a "load next page" listener when user scroll to the bottom of the list
-        binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage, binding.progressLoadingMore));
+        binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage));
 
         // Set an ItemTouchHelper for removing tracks from the list with a swipe motion
         boolean isActionsAllowed = room.isUserActionsAllowed() | getAuthService().getCurrentUser().getId().equals(room.getHost().getId());
@@ -282,6 +277,11 @@ public class RoomActivity extends TenQActivity {
             if (list != null && binding.progressListLoading.getVisibility() == View.VISIBLE) {
                 setUiLoadingState(false);
             }
+        });
+
+        model.getIsLoadingPage().observe(this, isLoadingPage -> {
+            if (isLoadingPage && binding.progressListLoading.getVisibility() == View.GONE)
+                binding.progressLoadingMore.setVisibility(View.VISIBLE);
         });
 
     }
@@ -307,6 +307,9 @@ public class RoomActivity extends TenQActivity {
      */
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_room_activity, menu);
+        if (!room.getHost().getId().equals(getAuthService().getCurrentUserId())) {
+            menu.findItem(R.id.settings).setVisible(false);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -321,16 +324,40 @@ public class RoomActivity extends TenQActivity {
             if (dialog != null && !isFinishing() && !isDestroyed()) {
                 dialog.show();
             }
-
         } else if (itemId == R.id.settings) {
             Intent intent = new Intent(RoomActivity.this, RoomSettingsActivity.class);
             intent.putExtra("roomId", room.getId()); // for debugging use this room id: "yYQK9C19BGy8nt5C4zxY"
             launchRoomSettingsActivity.launch(intent);
 
-        } else if (itemId == R.id.edit) {
-            Toast.makeText(this, "edit Clicked", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void onSettingsResult(androidx.activity.result.ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent intent = result.getData();
+            boolean actionsAllowed = room.isUserActionsAllowed();
+            if (intent != null) {
+                actionsAllowed = intent.getBooleanExtra("actionsAllowed", false);
+            }
+            room.setUserActionsAllowed(actionsAllowed);
+            trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().getCurrentUser().getId().equals(room.getHost().getId()));
+            TracksAdapter adapter = ((TracksAdapter) binding.recyclerTracks.getAdapter());
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    private void onSongsSearchResult(androidx.activity.result.ActivityResult result) {
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent intent = result.getData();
+            if (intent == null) return;
+            if (intent.getBooleanExtra("didAddSongs", false)) {
+                RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);
+                model.reloadList();
+            }
+        }
     }
 
     @Override
@@ -363,7 +390,7 @@ public class RoomActivity extends TenQActivity {
     protected void onDestroy() {
         super.onDestroy();
         RecorderService recorder = ((TenQApplication) getApplication()).getSoundAwarenessService().getRecorderService();
-        if ( recorder.isRecorderOn() ) recorder.stopRecorder();
+        if (recorder.isRecorderOn()) recorder.stopRecorder();
     }
 
     private void showDownloadSpotifyDialog() {

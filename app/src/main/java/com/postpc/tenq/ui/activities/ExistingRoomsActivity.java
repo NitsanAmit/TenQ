@@ -2,6 +2,7 @@ package com.postpc.tenq.ui.activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,10 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivityExistingRoomsBinding;
@@ -32,18 +31,16 @@ import com.postpc.tenq.viewmodels.ViewModelError;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ExistingRoomsActivity extends TenQActivity {
-    private final MutableLiveData<ViewModelError> error = new MutableLiveData<>(null);
-    private final MutableLiveData<Room> deletedRoom = new MutableLiveData<>(null);
     private ActivityExistingRoomsBinding binding;
 
     @Override
@@ -77,7 +74,7 @@ public class ExistingRoomsActivity extends TenQActivity {
 
     private void createNewRoom(String roomName) {
         User currentUser = getAuthService().getCurrentUser();
-        HashMap<String, Object> playlistDetails = new HashMap<>(4);
+        Map<String, Object> playlistDetails = new HashMap<>(4);
         playlistDetails.put("name", "TenQ - " + roomName);
         playlistDetails.put("public", false);
         playlistDetails.put("collaborative", true);
@@ -186,45 +183,33 @@ public class ExistingRoomsActivity extends TenQActivity {
 
             @Override
             public void onRoomDelete(Room room) {
-                Toast.makeText(ExistingRoomsActivity.this, "delete clicked!", Toast.LENGTH_SHORT).show();
-                User curUser = getAuthService().getCurrentUser();
-                deleteRoomForUser(room.getId(), curUser);
+                deleteRoom(room, getAuthService().getCurrentUser());
             }
 
             @Override
             public void onRoomClose(Room room) {
-                if (!room.getHost().getId().equals(getAuthService().getCurrentUser().getId())){
+                if (!room.getHost().getId().equals(getAuthService().getCurrentUser().getId())) {
                     Toast.makeText(ExistingRoomsActivity.this, "Only room host can close room", Toast.LENGTH_SHORT).show();
-                }
-                else if (!room.isActive()) {
-                    Toast.makeText(ExistingRoomsActivity.this, "room already closed", Toast.LENGTH_SHORT).show();
-                    return;
                 } else {
-                    LayoutInflater inflater = (LayoutInflater) ExistingRoomsActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    View view = inflater.inflate(R.layout.dialog_close_room, null);
-
                     // show alert dialog for closing room
-                    AlertDialog alertDialog = new AlertDialog.Builder(ExistingRoomsActivity.this)
-                            .setView(view)
-                            .create();
-                    alertDialog.show();
-                    view.findViewById(R.id.txt_cancel).setOnClickListener(cancel -> alertDialog.dismiss());
-
-                    // clicked close room
-                    view.findViewById(R.id.txt_close_room).setOnClickListener(closeRoom -> {
-                        FirebaseFirestore.getInstance()
-                                .collection("rooms").document(room.getId())
-                                .update("active", false)
-                                .addOnSuccessListener(documentReference -> {
-                                    Toast.makeText(ExistingRoomsActivity.this, "Success room closed", Toast.LENGTH_SHORT).show();
-
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("ExistingRoomsActivity", "Can't close room", e);
-                                    Toast.makeText(ExistingRoomsActivity.this, "Error closing room - try again later", Toast.LENGTH_SHORT).show();
-                                });
-                        alertDialog.dismiss();
-                    });
+                    new AlertDialog.Builder(ExistingRoomsActivity.this)
+                            .setTitle(R.string.txt_close_room)
+                            .setMessage(R.string.txt_body_close_room)
+                            .setPositiveButton(R.string.txt_close_room_red, (dialog, which) -> {
+                                FirebaseFirestore.getInstance()
+                                        .collection("rooms").document(room.getId())
+                                        .update("active", false)
+                                        .addOnSuccessListener(documentReference -> {
+                                            Toast.makeText(ExistingRoomsActivity.this, "Success room closed", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.e("ExistingRoomsActivity", "Can't close room", e);
+                                            Toast.makeText(ExistingRoomsActivity.this, "Error closing room - try again later", Toast.LENGTH_SHORT).show();
+                                        });
+                                dialog.dismiss();
+                            })
+                            .setNeutralButton(R.string.cancel, (dialog, where) -> dialog.dismiss())
+                            .create().show();
                     room.setActive(false);
                 }
             }
@@ -242,31 +227,32 @@ public class ExistingRoomsActivity extends TenQActivity {
         ExistingRoomsAdapter adapter = new ExistingRoomsAdapter(
                 rooms != null ? rooms : new ArrayList<>(),
                 actionListener,
-                itemClickListener);
+                itemClickListener,
+                getAuthService().getCurrentUserId());
         binding.recyclerExistingRooms.setAdapter(adapter);
-
-
     }
 
-    public void deleteRoomForUser(String roomId, User user) {
-        FirebaseFirestore.getInstance()
-                .collection("rooms")
-                .document(roomId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document != null && document.exists()) {
-                            Room room = document.toObject(Room.class);
-                            // check if room is active
-                            if (room != null) {
-                                removeUserFromRoom(room, user);
-                            } else {
-                                error.postValue(new ViewModelError("Can't remove, no such room"));
-                            }
+    private void deleteRoom(Room room, User user) {
+        SpotifyClient
+                .getClient()
+                .unfollowPlaylist(room.getPlaylist().getId())
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                        if (room.getHost().getId().equals(user.getId())) {
+                            FirebaseFirestore.getInstance()
+                                    .collection("rooms")
+                                    .document(room.getId())
+                                    .delete()
+                                    .addOnFailureListener(e -> Toast.makeText(ExistingRoomsActivity.this, "Error deleting room", Toast.LENGTH_SHORT).show());
                         } else {
-                            error.postValue(new ViewModelError("Error finding room"));
+                            removeUserFromRoom(room, user);
                         }
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                        Toast.makeText(ExistingRoomsActivity.this, "Error deleting room", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -280,9 +266,8 @@ public class ExistingRoomsActivity extends TenQActivity {
                 .update(userRef, "roomIds", FieldValue.arrayRemove(roomToDelete.getId()))
                 .update(roomRef, "guests", FieldValue.arrayRemove(user))
                 .commit()
-                .addOnSuccessListener(unused -> deletedRoom.postValue(roomToDelete))
                 .addOnFailureListener(e -> {
-                    error.postValue(new ViewModelError("Error deleting user from room, try again later"));
+                    Toast.makeText(ExistingRoomsActivity.this, "Error deleting user from room, try again later", Toast.LENGTH_SHORT).show();
                     Log.e("ExistingRoomsActivity", e.getMessage(), e);
                 });
     }

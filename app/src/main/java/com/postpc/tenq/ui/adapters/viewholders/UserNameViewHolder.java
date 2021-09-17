@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 public class UserNameViewHolder extends RecyclerView.ViewHolder{
 
     public TextView userName;
-    public ImageView deleteUser;
 
     public UserNameViewHolder(@NonNull @NotNull View itemView) {
         super(itemView);

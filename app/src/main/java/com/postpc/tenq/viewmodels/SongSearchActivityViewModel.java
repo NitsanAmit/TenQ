@@ -12,13 +12,6 @@ import com.postpc.tenq.models.SearchResult;
 import com.postpc.tenq.models.Track;
 import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
-import java.util.Map;
-import java.util.HashMap;
-import com.postpc.tenq.ui.activities.ExistingRoomsActivity;
-import com.postpc.tenq.models.User;
-import com.postpc.tenq.models.Playlist;
-import android.widget.Toast;
-
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +32,7 @@ public class SongSearchActivityViewModel extends ViewModel {
     public static final int PAGE_SIZE = 30;
     private final AtomicInteger offset = new AtomicInteger(0);
     private MutableLiveData<List<Track>> results;
+    private MutableLiveData<Boolean> addedTracks;
     private String query;
 
     public LiveData<List<Track>> getResults() {
@@ -46,6 +40,13 @@ public class SongSearchActivityViewModel extends ViewModel {
             results = new MutableLiveData<>(null);
         }
         return results;
+    }
+
+    public LiveData<Boolean> getDidAddTracks() {
+        if (addedTracks == null) {
+            addedTracks = new MutableLiveData<>(false);
+        }
+        return addedTracks;
     }
 
     public void searchSongs(String query) {
@@ -98,18 +99,19 @@ public class SongSearchActivityViewModel extends ViewModel {
     }
 
     public void addTrackToRoomPlaylist(User user, Room room, Track track) {
-        SpotifyClient.getClient().addTrackToPlaylist(room.getPlaylist().getId(), track.getUri()).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
-                // todo - should go back to room activity or stay in search activity
-                // todo notify added song to adapter
-            }
+        SpotifyClient.getClient()
+                .addTrackToPlaylist(room.getPlaylist().getId(), track.getUri())
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                        addedTracks.postValue(true);
+                    }
 
-            @Override
-            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
-                Log.e("SongSearchActivityViewModel", "Can't add track to playlist " + track.getUri(), t);
-            }
-        });
+                    @Override
+                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                        Log.e("SongSearchActivityViewModel", "Can't add track to playlist " + track.getUri(), t);
+                    }
+                });
     }
 }
 

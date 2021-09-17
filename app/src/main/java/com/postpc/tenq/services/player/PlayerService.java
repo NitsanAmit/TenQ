@@ -70,7 +70,6 @@ public class PlayerService implements IPlayerService {
 
     @Override
     public void disconnect() {
-        SpotifyAppRemote.disconnect(spotifyAppRemote);
         if (playerStateSubscription != null && !playerStateSubscription.isCanceled()) {
             playerStateSubscription.cancel();
             playerStateSubscription = null;
@@ -79,6 +78,7 @@ public class PlayerService implements IPlayerService {
             playerContextSubscription.cancel();
             playerContextSubscription = null;
         }
+        SpotifyAppRemote.disconnect(spotifyAppRemote);
         this.spotifyAppRemote = null;
         this.onPlayerError = null;
         this.currentSongUri = null;
@@ -137,4 +137,11 @@ public class PlayerService implements IPlayerService {
                 .setErrorCallback(t -> onPlayerError.onError(new PlayerError(PlayerErrorType.PLAYBACK_ERROR, t)));
     }
 
+    @Override
+    public void skipToIndex(String playlistUri, int index) {
+        this.spotifyAppRemote
+                .getPlayerApi()
+                .skipToIndex(playlistUri, index)
+                .setErrorCallback(t -> onPlayerError.onError(new PlayerError(PlayerErrorType.PLAYBACK_ERROR, t)));
+    }
 }
