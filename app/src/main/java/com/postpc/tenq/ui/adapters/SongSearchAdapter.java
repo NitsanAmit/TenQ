@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ListAdapter;
@@ -12,6 +13,8 @@ import com.bumptech.glide.Glide;
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.SpotifyEntity;
 import com.postpc.tenq.models.Track;
+import com.postpc.tenq.ui.activities.ExistingRoomsActivity;
+import com.postpc.tenq.ui.activities.SongSearchActivity;
 import com.postpc.tenq.ui.adapters.viewholders.SongSearchViewHolder;
 import com.postpc.tenq.ui.helpers.TracksDiffItemCallback;
 import com.postpc.tenq.ui.listeners.IOnSongAddClickedListener;
@@ -48,6 +51,7 @@ public class SongSearchAdapter extends ListAdapter<Track, SongSearchViewHolder> 
         holder.songName.setText(track.getName());
         holder.artistName.setText(track.getArtists().stream().map(SpotifyEntity::getName).collect(Collectors.joining(",")));
         holder.addSongButton.setOnClickListener(view -> {
+            Toast.makeText(view.getContext(), "Added song to playlist", Toast.LENGTH_SHORT).show();
             if (binding) return;
             listener.songAddClicked(track);
         });

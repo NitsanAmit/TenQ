@@ -11,7 +11,9 @@
     <string name="aria_join_with_id">Join with ID</string>
     <string name="hint_room_name">Room name</string>
     <string name="txt_create_new_room">Create new room</string>
+    <string name="txt_close_room">Close this room?</string>
     <string name="cancel">Cancel</string>
+    <string name="cancel_big">CANCEL</string>
     <string name="create_room">Create Room</string>
     <string name="share_room">Share Room</string>
     <string name="copy_room_link">Copy room link</string>
@@ -26,4 +28,6 @@
     <string name="add">Add</string>
     <string name="aria_add_song">Add new song</string>
     <string name="aria_export_playlist">Export playlist</string>
+    <string name="txt_close_room_red">CLOSE ROOM</string>
+    <string name="txt_body_close_room">After closing the room you will not be able to modify the room’s queue or play it again. You will still be able to export the created playlist to Spotify any time.</string>
 </resources>

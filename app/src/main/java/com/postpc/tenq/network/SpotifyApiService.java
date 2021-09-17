@@ -48,7 +48,13 @@ public interface SpotifyApiService {
     @PUT("playlists/{playlist_id}/tracks")
     Call<Void> reorderPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> details);
 
+    @PUT("playlists/{playlist_id}/followers")
+    Call<Void> followPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> details);
+
     @HTTP(method = "DELETE", path = "playlists/{playlist_id}/tracks", hasBody = true)
     Call<Void> removeTrackFromPlaylist(@Path("playlist_id") String playlistId, @Body() Map<String, Object> tracks);
+
+    @POST("playlists/{playlist_id}/tracks")
+    Call<Void> addTrackToPlaylist(@Path("playlist_id") String playlistId, @Query("uris") String trackUri);
 
 }
