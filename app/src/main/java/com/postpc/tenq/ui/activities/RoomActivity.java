@@ -363,6 +363,10 @@ public class RoomActivity extends TenQActivity {
     @Override
     protected void onStop() {
         new ViewModelProvider(this).get(RoomActivityViewModel.class).disconnectPlayerService();
+        RecorderService recorder = ((TenQApplication) getApplication()).getSoundAwarenessService().getRecorderService();
+        if (recorder.isRecorderOn()) {
+            recorder.stopRecorder();
+        }
         super.onStop();
     }
 
@@ -384,13 +388,6 @@ public class RoomActivity extends TenQActivity {
                 binding.iconPlay.setClickable(true);
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        RecorderService recorder = ((TenQApplication) getApplication()).getSoundAwarenessService().getRecorderService();
-        if (recorder.isRecorderOn()) recorder.stopRecorder();
     }
 
     private void showDownloadSpotifyDialog() {

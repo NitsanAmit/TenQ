@@ -8,7 +8,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
+import android.os.Build;
 
+import java.io.File;
 import java.util.Set;
 
 import static java.lang.Math.abs;
@@ -28,6 +30,7 @@ public class RecorderService {
     private boolean deviceConnected;
     private double prevAmplitude;
     private final AudioManager audioManager;
+    private final Context applicationContext;
 
     public RecorderService(Context applicationContext) {
 
@@ -36,6 +39,7 @@ public class RecorderService {
         this.userSetRecorderOn = true;
         this.isRecorderOn = true;
         this.deviceConnected = false;
+        this.applicationContext = applicationContext;
         runner = null;
 
         if (BluetoothAdapter.getDefaultAdapter() != null) {
@@ -79,7 +83,12 @@ public class RecorderService {
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOutputFile("/dev/null");
+            File tmpRecordingFile = new File(applicationContext.getFilesDir(), "temp_recording.3gp");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                mRecorder.setOutputFile(tmpRecordingFile);
+            } else {
+                mRecorder.setOutputFile("/dev/null");
+            }
             try
             {
                 mRecorder.prepare();
@@ -138,6 +147,10 @@ public class RecorderService {
             mRecorder.stop();
             mRecorder.release();
             mRecorder = null;
+            File tmpRecordingFile = new File(applicationContext.getFilesDir(), "temp_recording.3gp");
+            if (tmpRecordingFile.exists()) {
+                tmpRecordingFile.delete();
+            }
         }
         runner = null;
     }
