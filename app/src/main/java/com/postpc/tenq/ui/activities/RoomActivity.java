@@ -4,6 +4,7 @@ import static com.postpc.tenq.network.SpotifyClient.CLIENT_ID;
 import static com.postpc.tenq.network.SpotifyClient.REDIRECT_URI;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,7 +17,10 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,6 +36,7 @@ import com.postpc.tenq.core.TenQApplication;
 import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.services.RecorderService;
+import com.postpc.tenq.services.SoundAwarenessService;
 import com.postpc.tenq.ui.listeners.IOnDragStartListener;
 import com.postpc.tenq.ui.listeners.PagingScrollListener;
 import com.postpc.tenq.ui.adapters.TracksAdapter;
@@ -46,18 +51,15 @@ import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.types.PlayerState;
 
-import java.util.Objects;
-
 
 public class RoomActivity extends TenQActivity {
 
     private ActivityRoomBinding binding;
     private ItemTouchHelper itemTouchHelper;
     private Room room;
-    private TracksAdapter adapter;
-    private RecorderService recorder; //TODO Noam should not be static
-    //1 - make it not static here
-    // 2 - move it to the application class, and then it will outlive the activity, so you don't need to instantiate it every time the activity starts
+    private SoundAwarenessService soundAwareness;
+    private ActivityResultLauncher<Intent> launchRoomSettingsActivity;
+    private TrackTouchCallback trackTouchCallback;
     private final ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
             .setRedirectUri(REDIRECT_URI)
             .showAuthView(true)
@@ -82,10 +84,33 @@ public class RoomActivity extends TenQActivity {
         initRecyclerViewAndLoadPlaylist();
         initPlayer();
 
-        this.recorder = ((TenQApplication) getApplication()).getRecorderService();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) { //TODO NOAM only if sound awareness is on
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 10);
+        this.soundAwareness = ((TenQApplication) getApplication()).getSoundAwarenessService();
+        if (soundAwareness.getRecorderService().isUserSetRecorderOn() && soundAwareness.getRecorderService().isDeviceConnected() ) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO }, 10);
+            }
+            else {
+                soundAwareness.getRecorderService().startRecorder();
+            }
         }
+
+        launchRoomSettingsActivity = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent intent = result.getData();
+                        boolean actionsAllowed = room.isUserActionsAllowed();
+                        if (intent != null) {
+                            actionsAllowed = intent.getBooleanExtra("actionsAllowed", false);
+                        }
+                        room.setUserActionsAllowed(actionsAllowed);
+                        trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().getCurrentUser().getId().equals(room.getHost().getId()));
+                        TracksAdapter adapter = ((TracksAdapter) binding.recyclerTracks.getAdapter());
+                        if (adapter != null) {
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                });
     }
 
     private void initPlayer() {
@@ -197,8 +222,8 @@ public class RoomActivity extends TenQActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 10) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                recorder.startRecorder();
+            if (soundAwareness.getRecorderService().isDeviceConnected() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                soundAwareness.getRecorderService().startRecorder();
             } else {
                 Log.e("[RECORD_AUDIO]", "Permission denied");
             }
@@ -244,7 +269,9 @@ public class RoomActivity extends TenQActivity {
         binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage, binding.progressLoadingMore));
 
         // Set an ItemTouchHelper for removing tracks from the list with a swipe motion
-        itemTouchHelper = new ItemTouchHelper(new TrackTouchCallback(model, adapter));
+        boolean isActionsAllowed = room.isUserActionsAllowed() | getAuthService().getCurrentUser().getId().equals(room.getHost().getId());
+        trackTouchCallback = new TrackTouchCallback(model, adapter, isActionsAllowed);
+        itemTouchHelper = new ItemTouchHelper(trackTouchCallback);
         itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
 
         binding.recyclerTracks.setAdapter(adapter);
@@ -294,10 +321,12 @@ public class RoomActivity extends TenQActivity {
             if (dialog != null && !isFinishing() && !isDestroyed()) {
                 dialog.show();
             }
+
         } else if (itemId == R.id.settings) {
             Intent intent = new Intent(RoomActivity.this, RoomSettingsActivity.class);
             intent.putExtra("roomId", room.getId()); // for debugging use this room id: "yYQK9C19BGy8nt5C4zxY"
-            startActivity(intent);
+            launchRoomSettingsActivity.launch(intent);
+
         } else if (itemId == R.id.edit) {
             Toast.makeText(this, "edit Clicked", Toast.LENGTH_SHORT).show();
         }
@@ -305,16 +334,9 @@ public class RoomActivity extends TenQActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        //this.recorder.startRecorder(); TODO NOAM only call this is if the user enabled sound awareness...
-    }
-
-    @Override
     protected void onStop() {
-        //this.recorder.stopRecorder(); TODO NOAM only call this is if the user enabled sound awareness...
-        super.onStop();
         new ViewModelProvider(this).get(RoomActivityViewModel.class).disconnectPlayerService();
+        super.onStop();
     }
 
 
@@ -335,6 +357,13 @@ public class RoomActivity extends TenQActivity {
                 binding.iconPlay.setClickable(true);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RecorderService recorder = ((TenQApplication) getApplication()).getSoundAwarenessService().getRecorderService();
+        if ( recorder.isRecorderOn() ) recorder.stopRecorder();
     }
 
     private void showDownloadSpotifyDialog() {

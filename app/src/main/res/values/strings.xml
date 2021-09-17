@@ -20,7 +20,8 @@
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="enable_sound_awareness">Enable sound awareness</string>
     <string name="allow_foreign_actions">Allow foreign actions</string>
-    <string name="sound_awareness_sub_text">Listen to the room sounds and automatically reduce/increase the bluetooth device volume</string>
+    <string name="sound_awareness_sub_text">Listen to the room sounds and automatically reduce/increase the bluetooth device volume.</string>
+    <string name="sound_awareness_bluetooth_sub_text">-> Has to be connected to a Bluetooth device in order to activate</string>
     <string name="allow_foreign_sub_text">Let users perform delete/reorder actions on songs they didn’t add themselves</string>
     <string name="join">JOIN</string>
     <string name="insert_room_id">Insert Room ID</string>

@@ -1,7 +1,11 @@
 package com.postpc.tenq.ui.activities;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,7 +17,12 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
+import com.postpc.tenq.core.TenQApplication;
+import com.postpc.tenq.databinding.ActivityRoomBinding;
+import com.postpc.tenq.databinding.ActivityRoomSettingsBinding;
 import com.postpc.tenq.models.Room;
+import com.postpc.tenq.models.User;
+import com.postpc.tenq.services.SoundAwarenessService;
 import com.postpc.tenq.ui.adapters.UserNamesAdapter;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,14 +32,27 @@ import java.util.List;
 public class RoomSettingsActivity extends TenQActivity {
 
     private Room room;
+    private ActivityRoomSettingsBinding binding;
+    private SoundAwarenessService soundAwareness;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_room_settings);
-        // todo use button with services (sound awareness)
-        // todo - need to decide if each user has different permissions for adding and deleting song, or all have the same permissions
+        binding = ActivityRoomSettingsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        this.soundAwareness = ((TenQApplication) getApplication()).getSoundAwarenessService();
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            if (room == null) {
+                String roomId = extras.getString("roomId");
+                fetchRoomFromFirestore(roomId);
+                return;
+            }
+        }
         createUsersListOnScreen();
+        setSettings();
     }
 
     private void createUsersListOnScreen() {
@@ -59,10 +81,59 @@ public class RoomSettingsActivity extends TenQActivity {
     }
 
     private void setRecyclerViewForUsers() {
-        RecyclerView recyclerView = findViewById(R.id.recycler_user_names);
         UserNamesAdapter adapter = new UserNamesAdapter(room.getGuests());
-        recyclerView.setLayoutManager(new LinearLayoutManager(RoomSettingsActivity.this, RecyclerView.VERTICAL, false));
-        recyclerView.setAdapter(adapter);
+        binding.recyclerUserNames.setLayoutManager(new LinearLayoutManager(RoomSettingsActivity.this, RecyclerView.VERTICAL, false));
+        binding.recyclerUserNames.setAdapter(adapter);
+    }
+
+    private void setSettings() {
+        User currentUser = getAuthService().getCurrentUser();
+        if (!currentUser.getId().equals(room.getHost().getId())) { // if the users are not the host then they can't change the settings
+            binding.switchSoundsAwareness.setClickable(false);
+            binding.switchForeignActions.setClickable(false);
+        }
+
+        binding.switchSoundsAwareness.setEnabled(soundAwareness.getRecorderService().isDeviceConnected());
+        binding.switchSoundsAwareness.setChecked(soundAwareness.getRecorderService().isUserSetRecorderOn());
+        binding.switchForeignActions.setEnabled(currentUser.getId().equals(room.getHost().getId()));
+        binding.switchForeignActions.setChecked(room.isUserActionsAllowed());
+
+        binding.switchSoundsAwareness.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+
+            soundAwareness.getRecorderService().setUserSetRecorderOn(isChecked);
+            if (isChecked) {
+                soundAwareness.getRecorderService().startRecorder();
+            }
+            else {
+                soundAwareness.getRecorderService().stopRecorder();
+            }
+            soundAwareness.saveCurrentRecorderState(isChecked);
+        });
+
+        binding.switchForeignActions.setOnCheckedChangeListener((compoundButton, isChecked) ->
+        {
+            setResult(Activity.RESULT_OK, getIntent().putExtra("actionsAllowed", isChecked));
+            FirebaseFirestore.getInstance()
+                    .collection("rooms")
+                    .document(room.getId())
+                    .update("userActionsAllowed", isChecked);
+        });
+    }
+
+    private void fetchRoomFromFirestore(String roomId) {
+        FirebaseFirestore.getInstance()
+                .collection("rooms")
+                .document(roomId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        room = task.getResult().toObject(Room.class);
+                        createUsersListOnScreen();
+                        setSettings();
+                    } else {
+                        Log.e("RoomActivity", "Can't fetch room", task.getException());
+                    }
+                });
     }
 
 }

@@ -1,6 +1,7 @@
 package com.postpc.tenq.ui.adapters;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ListAdapter;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.models.PlaylistTrack;
 import com.postpc.tenq.models.Room;
@@ -104,6 +106,7 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
             return false;
         });
 
+        holder.reorderIcon.setVisibility((room.isUserActionsAllowed() | currentUser.getId().equals(room.getHost().getId())) ? View.VISIBLE : View.GONE);
         binding = false;
     }
 
@@ -142,4 +145,5 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
             notifyItemMoved(fromPosition, toPosition);
         });
     }
+
 }

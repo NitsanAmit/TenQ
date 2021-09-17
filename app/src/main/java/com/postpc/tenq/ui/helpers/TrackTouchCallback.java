@@ -20,8 +20,11 @@ public class TrackTouchCallback extends ItemTouchHelper.SimpleCallback {
     private int fromPosition;
     private int toPosition;
 
-    public TrackTouchCallback(RoomActivityViewModel model, TracksAdapter adapter) {
+    public TrackTouchCallback(RoomActivityViewModel model, TracksAdapter adapter, boolean isActionsAllowed) {
         super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT);
+        if (!isActionsAllowed) {
+            this.setDefaultSwipeDirs(0); // enable swiping left if action's not allowed
+        }
         this.model = model;
         this.adapter = adapter;
     }
@@ -45,7 +48,7 @@ public class TrackTouchCallback extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onChildDraw(@NonNull @NotNull Canvas c, @NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-        // Fade out the view as it is swiped out of the list
+        // Fade out the view as it is swiped out of the list (delete)
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
             View itemView = viewHolder.itemView;
             final float alpha = 1 - Math.abs(dX) / (float) itemView.getWidth();
@@ -72,6 +75,15 @@ public class TrackTouchCallback extends ItemTouchHelper.SimpleCallback {
         // Let the view holder know that it is no longer being moved or dragged
         viewHolder.itemView.setAlpha(1f);
         ((ItemTouchHelperViewHolder) viewHolder).onItemClear();
+    }
+
+    public void setIsActionsAllowed(boolean isActionsAllowed) {
+        if (!isActionsAllowed)  {
+            this.setDefaultSwipeDirs(0);
+        }
+        else {
+            this.setDefaultSwipeDirs(ItemTouchHelper.LEFT);
+        }
     }
 
 }
