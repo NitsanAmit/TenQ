@@ -106,7 +106,7 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
             return false;
         });
 
-        holder.reorderIcon.setVisibility((!room.isUserActionsAllowed() && !currentUser.getId().equals(room.getHost().getId()))? View.GONE : View.VISIBLE);
+        holder.reorderIcon.setVisibility((room.isUserActionsAllowed() | currentUser.getId().equals(room.getHost().getId())) ? View.VISIBLE : View.GONE);
         binding = false;
     }
 

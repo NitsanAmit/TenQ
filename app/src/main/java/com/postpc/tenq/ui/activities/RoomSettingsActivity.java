@@ -95,6 +95,7 @@ public class RoomSettingsActivity extends TenQActivity {
 
         binding.switchSoundsAwareness.setEnabled(soundAwareness.getRecorderService().isDeviceConnected());
         binding.switchSoundsAwareness.setChecked(soundAwareness.getRecorderService().isUserSetRecorderOn());
+        binding.switchForeignActions.setEnabled(currentUser.getId().equals(room.getHost().getId()));
         binding.switchForeignActions.setChecked(room.isUserActionsAllowed());
 
         binding.switchSoundsAwareness.setOnCheckedChangeListener((compoundButton, isChecked) -> {

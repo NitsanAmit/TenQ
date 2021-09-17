@@ -59,6 +59,7 @@ public class RoomActivity extends TenQActivity {
     private Room room;
     private SoundAwarenessService soundAwareness;
     private ActivityResultLauncher<Intent> launchRoomSettingsActivity;
+    private TrackTouchCallback trackTouchCallback;
     private final ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
             .setRedirectUri(REDIRECT_URI)
             .showAuthView(true)
@@ -103,8 +104,7 @@ public class RoomActivity extends TenQActivity {
                             actionsAllowed = intent.getBooleanExtra("actionsAllowed", false);
                         }
                         room.setUserActionsAllowed(actionsAllowed);
-                        // TODO: how to disable track deletion if guests actions not allowed?
-                        //itemTouchHelper.attachToRecyclerView(actionsAllowed ? binding.recyclerTracks : null);
+                        trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().getCurrentUser().getId().equals(room.getHost().getId()));
                         TracksAdapter adapter = ((TracksAdapter) binding.recyclerTracks.getAdapter());
                         if (adapter != null) {
                             adapter.notifyDataSetChanged();
@@ -269,7 +269,9 @@ public class RoomActivity extends TenQActivity {
         binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage, binding.progressLoadingMore));
 
         // Set an ItemTouchHelper for removing tracks from the list with a swipe motion
-        itemTouchHelper = new ItemTouchHelper(new TrackTouchCallback(model, adapter));
+        boolean isActionsAllowed = room.isUserActionsAllowed() | getAuthService().getCurrentUser().getId().equals(room.getHost().getId());
+        trackTouchCallback = new TrackTouchCallback(model, adapter, isActionsAllowed);
+        itemTouchHelper = new ItemTouchHelper(trackTouchCallback);
         itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
 
         binding.recyclerTracks.setAdapter(adapter);
