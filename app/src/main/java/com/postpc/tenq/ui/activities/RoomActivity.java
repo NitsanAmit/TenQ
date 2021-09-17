@@ -84,10 +84,13 @@ public class RoomActivity extends TenQActivity {
         initPlayer();
 
         this.soundAwareness = ((TenQApplication) getApplication()).getSoundAwarenessService();
-        if (soundAwareness.getRecorderService().isUserSetRecorderOn() &&
-                soundAwareness.getRecorderService().isDeviceConnected() &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO }, 10);
+        if (soundAwareness.getRecorderService().isUserSetRecorderOn() && soundAwareness.getRecorderService().isDeviceConnected() ) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{ Manifest.permission.RECORD_AUDIO }, 10);
+            }
+            else {
+                soundAwareness.getRecorderService().startRecorder();
+            }
         }
 
         launchRoomSettingsActivity = registerForActivityResult(
@@ -320,7 +323,6 @@ public class RoomActivity extends TenQActivity {
         } else if (itemId == R.id.settings) {
             Intent intent = new Intent(RoomActivity.this, RoomSettingsActivity.class);
             intent.putExtra("roomId", room.getId()); // for debugging use this room id: "yYQK9C19BGy8nt5C4zxY"
-            //startActivity(intent);
             launchRoomSettingsActivity.launch(intent);
 
         } else if (itemId == R.id.edit) {
@@ -330,20 +332,9 @@ public class RoomActivity extends TenQActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        RecorderService recorder = soundAwareness.getRecorderService();
-        if ( recorder.isRecorderOn() && ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED ) {
-            recorder.startRecorder();
-        }
-    }
-
-    @Override
     protected void onStop() {
-        new ViewModelProvider(this).get(RoomActivityViewModel.class).disconnectPlayerService(); // TODO: this either
+        new ViewModelProvider(this).get(RoomActivityViewModel.class).disconnectPlayerService();
         super.onStop();
-        RecorderService recorder = ((TenQApplication) getApplication()).getSoundAwarenessService().getRecorderService();
-        if ( recorder.isRecorderOn() ) recorder.stopRecorder(); // TODO: should not be here - it called when moving between activities
     }
 
 
@@ -364,6 +355,13 @@ public class RoomActivity extends TenQActivity {
                 binding.iconPlay.setClickable(true);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        RecorderService recorder = ((TenQApplication) getApplication()).getSoundAwarenessService().getRecorderService();
+        if ( recorder.isRecorderOn() ) recorder.stopRecorder();
     }
 
     private void showDownloadSpotifyDialog() {

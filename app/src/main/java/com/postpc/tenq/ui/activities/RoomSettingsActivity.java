@@ -92,14 +92,13 @@ public class RoomSettingsActivity extends TenQActivity {
             binding.switchSoundsAwareness.setClickable(false);
             binding.switchForeignActions.setClickable(false);
         }
+
+        binding.switchSoundsAwareness.setEnabled(soundAwareness.getRecorderService().isDeviceConnected());
         binding.switchSoundsAwareness.setChecked(soundAwareness.getRecorderService().isUserSetRecorderOn());
         binding.switchForeignActions.setChecked(room.isUserActionsAllowed());
 
         binding.switchSoundsAwareness.setOnCheckedChangeListener((compoundButton, isChecked) -> {
-            if (isChecked && !soundAwareness.getRecorderService().isDeviceConnected()) {
-                Toast.makeText(this, "Has to be connected to a Bluetooth device", Toast.LENGTH_SHORT).show();
-                return;
-            }
+
             soundAwareness.getRecorderService().setUserSetRecorderOn(isChecked);
             if (isChecked) {
                 soundAwareness.getRecorderService().startRecorder();

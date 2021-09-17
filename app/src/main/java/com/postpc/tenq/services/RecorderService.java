@@ -35,35 +35,12 @@ public class RecorderService {
         this.prevAmplitude = getAmplitude();
         this.userSetRecorderOn = true;
         this.isRecorderOn = true;
+        this.deviceConnected = false;
         runner = null;
 
-        Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
-        this.deviceConnected = pairedDevices.size() > 0;
-
-        if (runner == null)
-        {
-            runner = new Thread(() -> {
-                while (runner != null)
-                {
-                    try
-                    {
-                        Thread.sleep(MILLIS);
-                    }
-                    catch (InterruptedException e) {
-                        android.util.Log.e("[Recorder]", "InterruptedException: " + android.util.Log.getStackTraceString(e));
-                    }
-
-                    double currentAmplitude = getAmplitude();
-                    int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-
-                    if (abs(currentAmplitude - prevAmplitude) > (double) (MAX_AMPLITUDE / maxVolume)) {
-                        int newVolume = (int) (( currentAmplitude / MAX_AMPLITUDE ) * maxVolume);
-                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (Math.max(newVolume, 4)), 0);
-                    }
-                    prevAmplitude = currentAmplitude;
-                }
-            });
-            runner.start();
+        if (BluetoothAdapter.getDefaultAdapter() != null) {
+            Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
+            this.deviceConnected = pairedDevices.size() > 0;
         }
 
         IntentFilter filter = new IntentFilter();
@@ -94,7 +71,6 @@ public class RecorderService {
 
     public void startRecorder(){
 
-        android.util.Log.e("[recorder]", "start recording");
         isRecorderOn = true;
 
         if (mRecorder == null)
@@ -122,10 +98,37 @@ public class RecorderService {
 
         }
 
+        if (runner == null)
+        {
+            runner = new Thread(() -> {
+                while (runner != null)
+                {
+                    try
+                    {
+                        Thread.sleep(MILLIS);
+                    }
+                    catch (InterruptedException e) {
+                        android.util.Log.e("[Recorder]", "InterruptedException: " + android.util.Log.getStackTraceString(e));
+                    }
+
+                    double currentAmplitude = getAmplitude();
+                    int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
+                    if (abs(currentAmplitude - prevAmplitude) > (double) (MAX_AMPLITUDE / maxVolume)) {
+                        int newVolume = (int) (( currentAmplitude / MAX_AMPLITUDE ) * maxVolume);
+                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (Math.max(newVolume, 4)), 0);
+                    }
+                    android.util.Log.e("[Recorder]", "amplitude: " + currentAmplitude);
+                    prevAmplitude = currentAmplitude;
+                }
+            });
+            runner.start();
+        }
+
     }
 
     public void stopRecorder() {
-        android.util.Log.e("[recorder]", "stop recording");
+
         isRecorderOn = false;
 
         if (mRecorder != null) {

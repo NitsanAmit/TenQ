@@ -22,12 +22,12 @@ public class SoundAwarenessService {
 
     public void saveCurrentRecorderState(boolean recorderState) {
         SharedPreferences prefs = applicationContext.getSharedPreferences(RECORD_SERVICE_PREFS, Context.MODE_PRIVATE);
-        prefs.edit().putString(RECORDER_KEY, gson.toJson(recorderState)).apply();
+        prefs.edit().putBoolean(RECORDER_KEY, recorderState).apply();
     }
 
     private boolean getRecorderStateFromSharedPreferences() {
         SharedPreferences prefs = applicationContext.getSharedPreferences(RECORD_SERVICE_PREFS, Context.MODE_PRIVATE);
-        return gson.fromJson(prefs.getString(RECORDER_KEY, null), boolean.class);
+        return prefs.getBoolean(RECORDER_KEY, true);
     }
 
     public RecorderService getRecorderService() {
