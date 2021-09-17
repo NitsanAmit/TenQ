@@ -20,6 +20,10 @@ public class Room implements Serializable {
 
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public Room(String name, User host) {
         this.name = name;
         this.host = host;

@@ -1,16 +1,21 @@
 package com.postpc.tenq.ui.activities;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.lifecycle.MutableLiveData;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -23,6 +28,9 @@ import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
 import com.postpc.tenq.ui.adapters.ExistingRoomsAdapter;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
+import com.postpc.tenq.viewmodels.ViewModelError;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -34,7 +42,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ExistingRoomsActivity extends TenQActivity {
-
+    private final MutableLiveData<ViewModelError> error = new MutableLiveData<>(null);
+    private final MutableLiveData<Room> deletedRoom = new MutableLiveData<>(null);
     private ActivityExistingRoomsBinding binding;
 
     @Override
@@ -156,25 +165,78 @@ public class ExistingRoomsActivity extends TenQActivity {
         IRoomActionListener actionListener = new IRoomActionListener() { //TODO implement
             @Override
             public void onRoomExport(Room room) {
-                Toast.makeText(ExistingRoomsActivity.this, "export clicked!", Toast.LENGTH_SHORT).show();
+                HashMap<String, Object> bodyDetails = new HashMap<>(1);
+                bodyDetails.put("public", false);
+                SpotifyClient
+                        .getClient()
+                        .followPlaylist(room.getPlaylist().getId(), bodyDetails)
+                        .enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                                Toast.makeText(ExistingRoomsActivity.this, "You can now find the playlist on spotify library", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                                Log.e("ExistingRoomsActivity", t.getMessage(), t);
+                            }
+                        });
             }
+
 
             @Override
             public void onRoomDelete(Room room) {
                 Toast.makeText(ExistingRoomsActivity.this, "delete clicked!", Toast.LENGTH_SHORT).show();
+                User curUser = getAuthService().getCurrentUser();
+                deleteRoomForUser(room.getId(), curUser);
             }
 
             @Override
             public void onRoomClose(Room room) {
-                Toast.makeText(ExistingRoomsActivity.this, "close clicked!", Toast.LENGTH_SHORT).show();
+                if (!room.getHost().getId().equals(getAuthService().getCurrentUser().getId())){
+                    Toast.makeText(ExistingRoomsActivity.this, "Only room host can close room", Toast.LENGTH_SHORT).show();
+                }
+                else if (!room.isActive()) {
+                    Toast.makeText(ExistingRoomsActivity.this, "room already closed", Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    LayoutInflater inflater = (LayoutInflater) ExistingRoomsActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View view = inflater.inflate(R.layout.dialog_close_room, null);
+
+                    // show alert dialog for closing room
+                    AlertDialog alertDialog = new AlertDialog.Builder(ExistingRoomsActivity.this)
+                            .setView(view)
+                            .create();
+                    alertDialog.show();
+                    view.findViewById(R.id.txt_cancel).setOnClickListener(cancel -> alertDialog.dismiss());
+
+                    // clicked close room
+                    view.findViewById(R.id.txt_close_room).setOnClickListener(closeRoom -> {
+                        FirebaseFirestore.getInstance()
+                                .collection("rooms").document(room.getId())
+                                .update("active", false)
+                                .addOnSuccessListener(documentReference -> {
+                                    Toast.makeText(ExistingRoomsActivity.this, "Success room closed", Toast.LENGTH_SHORT).show();
+
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("ExistingRoomsActivity", "Can't close room", e);
+                                    Toast.makeText(ExistingRoomsActivity.this, "Error closing room - try again later", Toast.LENGTH_SHORT).show();
+                                });
+                        alertDialog.dismiss();
+                    });
+                    room.setActive(false);
+                }
             }
         };
 
         View.OnClickListener itemClickListener = v -> {
             int itemPosition = binding.recyclerExistingRooms.getChildLayoutPosition(v);
-            Intent intent = new Intent(this, RoomActivity.class);
-            intent.putExtra("room", rooms.get(itemPosition));
-            startActivity(intent);
+            if (rooms.get(itemPosition).isActive()) {
+                Intent intent = new Intent(this, RoomActivity.class);
+                intent.putExtra("room", rooms.get(itemPosition));
+                startActivity(intent);
+            }
         };
 
         ExistingRoomsAdapter adapter = new ExistingRoomsAdapter(
@@ -182,5 +244,46 @@ public class ExistingRoomsActivity extends TenQActivity {
                 actionListener,
                 itemClickListener);
         binding.recyclerExistingRooms.setAdapter(adapter);
+
+
+    }
+
+    public void deleteRoomForUser(String roomId, User user) {
+        FirebaseFirestore.getInstance()
+                .collection("rooms")
+                .document(roomId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            Room room = document.toObject(Room.class);
+                            // check if room is active
+                            if (room != null) {
+                                removeUserFromRoom(room, user);
+                            } else {
+                                error.postValue(new ViewModelError("Can't remove, no such room"));
+                            }
+                        } else {
+                            error.postValue(new ViewModelError("Error finding room"));
+                        }
+                    }
+                });
+    }
+
+    private void removeUserFromRoom(Room roomToDelete, User user) {
+        FirebaseFirestore instance = FirebaseFirestore.getInstance();
+        DocumentReference userRef = instance.collection("users").document(user.getId());
+        DocumentReference roomRef = instance.collection("rooms").document(roomToDelete.getId());
+        instance
+                .batch()
+                .update(userRef, "roomIds", FieldValue.arrayRemove(roomToDelete.getId()))
+                .update(roomRef, "guests", FieldValue.arrayRemove(user))
+                .commit()
+                .addOnSuccessListener(unused -> deletedRoom.postValue(roomToDelete))
+                .addOnFailureListener(e -> {
+                    error.postValue(new ViewModelError("Error deleting user from room, try again later"));
+                    Log.e("ExistingRoomsActivity", e.getMessage(), e);
+                });
     }
 }
