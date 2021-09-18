@@ -25,6 +25,7 @@ import com.postpc.tenq.models.Room;
 import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
 import com.postpc.tenq.ui.adapters.ExistingRoomsAdapter;
+import com.postpc.tenq.ui.helpers.ExportPlaylistUtil;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +43,6 @@ import retrofit2.Response;
 
 public class ExistingRoomsActivity extends TenQActivity {
     private ActivityExistingRoomsBinding binding;
-    private AtomicBoolean isExporting = new AtomicBoolean(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,30 +163,11 @@ public class ExistingRoomsActivity extends TenQActivity {
         IRoomActionListener actionListener = new IRoomActionListener() {
             @Override
             public void onRoomExport(Room room) {
-                if (isExporting.get()) return;
-                isExporting.set(true);
-                User currentUser = getAuthService().getCurrentUser();
-                Map<String, Object> playlistDetails = new HashMap<>(4);
-                playlistDetails.put("name", "TenQ exported - " + room.getName());
-                playlistDetails.put("public", false);
-                playlistDetails.put("description", String.format("Your personal copy of TenQ's '%s' room playlist", room.getName()));
-                SpotifyClient.getClient()
-                        .createPlaylist(currentUser.getId(), playlistDetails)
-                        .enqueue(new Callback<>() {
-                            @Override
-                            public void onResponse(@NonNull Call<Playlist> call, @NonNull Response<Playlist> response) {
-                                if (response.code() == 201) {
-                                    getExistingPlaylistTracks(response.body(), room);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(@NonNull Call<Playlist> call, @NonNull Throwable t) {
-                                Log.e("ExistingRoomActivity", t.getMessage(), t);
-                                Toast.makeText(ExistingRoomsActivity.this, "Error exporting playlist: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                                isExporting.set(false);
-                            }
-                        });
+                ExportPlaylistUtil.exportPlaylist(
+                        room,
+                        getAuthService().getCurrentUser(),
+                        message -> Toast.makeText(ExistingRoomsActivity.this, message, Toast.LENGTH_SHORT).show()
+                );
             }
 
 
@@ -241,49 +222,6 @@ public class ExistingRoomsActivity extends TenQActivity {
         binding.recyclerExistingRooms.setAdapter(adapter);
     }
 
-    private void getExistingPlaylistTracks(Playlist createdPlaylist, Room room) {
-        SpotifyClient.getClient()
-                .getPlaylistTracks(room.getPlaylist().getId(), 100, 0) // 100 is the page limit
-                .enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(@NotNull Call<Page<PlaylistTrack>> call, @NotNull Response<Page<PlaylistTrack>> response) {
-                        if (response.code() == 200) {
-                            addTracksToPlaylist(response.body(), createdPlaylist);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Call<Page<PlaylistTrack>> call, @NotNull Throwable t) {
-                        Log.e("ExistingRoomActivity", t.getMessage(), t);
-                        Toast.makeText(ExistingRoomsActivity.this, "Error exporting playlist: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        isExporting.set(false);
-                    }
-                });
-    }
-
-    private void addTracksToPlaylist(@NonNull Page<PlaylistTrack> tracksPage, Playlist createdPlaylist) {
-        SpotifyClient
-                .getClient()
-                .addTrackToPlaylist(createdPlaylist.getId(), tracksPage.getItems()
-                        .stream()
-                        .map(track -> track.getTrack().getUri())
-                        .collect(Collectors.joining(","))
-                )
-                .enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
-                        Toast.makeText(ExistingRoomsActivity.this, "Exported successfully", Toast.LENGTH_SHORT).show();
-                        isExporting.set(false);
-                    }
-
-                    @Override
-                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
-                        Log.e("ExistingRoomActivity", t.getMessage(), t);
-                        Toast.makeText(ExistingRoomsActivity.this, "Error exporting playlist: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        isExporting.set(false);
-                    }
-                });
-    }
 
     private void deleteRoom(Room room, User user) {
         SpotifyClient

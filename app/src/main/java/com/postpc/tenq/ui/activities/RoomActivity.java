@@ -36,6 +36,7 @@ import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.services.RecorderService;
 import com.postpc.tenq.services.SoundAwarenessService;
+import com.postpc.tenq.ui.helpers.ExportPlaylistUtil;
 import com.postpc.tenq.ui.listeners.IOnDragStartListener;
 import com.postpc.tenq.ui.listeners.PagingScrollListener;
 import com.postpc.tenq.ui.adapters.TracksAdapter;
@@ -258,6 +259,15 @@ public class RoomActivity extends TenQActivity {
                 spotifySearchResultLauncher.launch(intent);
             }
         });
+        binding.fabExportPlaylist.setOnClickListener(v -> {
+            ExportPlaylistUtil.exportPlaylist(
+                    room,
+                    getAuthService().getCurrentUser(),
+                    message -> Toast.makeText(RoomActivity.this, message, Toast.LENGTH_SHORT).show()
+            );
+        });
+
+
         // Set the layout manager
         binding.recyclerTracks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 
