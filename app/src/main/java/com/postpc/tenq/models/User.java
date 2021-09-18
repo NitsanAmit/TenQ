@@ -7,7 +7,6 @@ import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 
 public class User extends SpotifyEntity implements Serializable {
