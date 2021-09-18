@@ -20,13 +20,12 @@
         android:layout_marginTop="32dp"
         />
 
-    <!-- TODO animate the progress bar -->
     <ProgressBar
         android:id="@+id/progress_main_activity"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:progress="32"
+        android:progress="0"
         android:layout_marginTop="16dp"
         android:progressTint="@color/primary"
         android:progressBackgroundTint="#B8B8B8"

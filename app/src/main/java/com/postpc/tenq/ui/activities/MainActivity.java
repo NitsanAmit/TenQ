@@ -10,10 +10,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
-import com.postpc.tenq.core.TenQApplication;
 import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
-import com.postpc.tenq.services.RecorderService;
+import com.postpc.tenq.ui.animations.ProgressBarAnimation;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -29,6 +28,8 @@ import retrofit2.Response;
 import static com.postpc.tenq.network.SpotifyClient.AUTHORIZATION_SCOPES;
 import static com.postpc.tenq.network.SpotifyClient.CLIENT_ID;
 
+import androidx.annotation.NonNull;
+
 public class MainActivity extends TenQActivity {
 
     private static final int REQUEST_CODE = 1337;
@@ -37,6 +38,9 @@ public class MainActivity extends TenQActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        final ProgressBarAnimation anim = new ProgressBarAnimation(findViewById(R.id.progress_main_activity));
+        anim.setDuration(3500);
+        runOnUiThread(() -> findViewById(R.id.progress_main_activity).startAnimation(anim));
 
         startSpotifyAuthFlow();
 
@@ -75,7 +79,6 @@ public class MainActivity extends TenQActivity {
         }
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             String token = response.getAccessToken();
-            Log.d("LoginActivity", "Got token!\n" + token);
             SpotifyClient.init(token);
             if (getAuthService().getCurrentUser() == null) {
                 getUserProfile();
@@ -101,8 +104,7 @@ public class MainActivity extends TenQActivity {
                     public void onResponse(@NotNull Call<User> call, @NotNull Response<User> response) {
                         if (response.code() == 200) {
                             User profile = response.body();
-                            if (profile == null) return; //TODO error
-                            Log.d("LoginActivity", "Got profile!\n" + profile.toString());
+                            if (profile == null) return;
                             MainActivity.this.getAuthService().saveCurrentUser(profile);
                             registerUser();
                             startRoomsActivity();
@@ -111,7 +113,7 @@ public class MainActivity extends TenQActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<User> call, Throwable error) {
+                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable error) {
                         Log.e("LoginActivity", "Profile failure: ", error);
                     }
                 });
