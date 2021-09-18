@@ -19,3 +19,45 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-dontwarn com.google.**
+
+-keepnames class com.postpc.tenq.models.**
+-keep class com.postpc.tenq.models.** { *; }
+-keepnames class com.postpc.tenq.viewmodels.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+-dontwarn com.google.android.gms.**
+
+-keep class com.postpc.tenq.ui.helpers.** { *; }
+
+-keep class com.google.firebase.database.** { *; }
+
+-keepclassmembers enum * { *; }
+
+-keepattributes *Annotation*,Signature
+-keepattributes SourceFile,LineNumberTable
+
+# Required
+-keepattributes Signature,InnerClasses,Annotation
+-keepattributes SourceFile,LineNumberTable
+-keepattributes *Annotation*
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-dontwarn sun.misc.Unsafe
+-dontwarn java.lang.ClassValue
+-keep class com.google.j2objc.annotations.** { *; }
+-keep class java.lang.ClassValue { *; }
+-dontwarn javax.annotation.**
+-dontwarn javax.inject.**
+-dontwarn sun.misc.Unsafe
+
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
