@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
+import com.postpc.tenq.models.Room;
 import com.postpc.tenq.models.User;
 
 public class AuthService implements IAuthService {
@@ -58,6 +59,12 @@ public class AuthService implements IAuthService {
             this.currentUser = prefsUser;
         }
         return prefsUser;
+    }
+
+    @Override
+    public boolean isCurrentUserHost(Room room) {
+        if (currentUser == null) return false;
+        return room.getHost().getId().equals(currentUser.getId());
     }
 
     private SharedPreferences getAuthServicePreferences() {

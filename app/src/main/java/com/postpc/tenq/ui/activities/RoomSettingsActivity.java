@@ -3,31 +3,18 @@ package com.postpc.tenq.ui.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.core.TenQApplication;
-import com.postpc.tenq.databinding.ActivityRoomBinding;
 import com.postpc.tenq.databinding.ActivityRoomSettingsBinding;
 import com.postpc.tenq.models.Room;
-import com.postpc.tenq.models.User;
 import com.postpc.tenq.services.SoundAwarenessService;
 import com.postpc.tenq.ui.adapters.UserNamesAdapter;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class RoomSettingsActivity extends TenQActivity {
 
@@ -64,18 +51,18 @@ public class RoomSettingsActivity extends TenQActivity {
                     .collection("rooms")
                     .document(roomId)
                     .get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document != null && document.exists()) {
-                                room = document.toObject(Room.class);
-                                // show list of all user names for disabling
-                                setRecyclerViewForUsers();
-                            } else {
-                                Log.d("RoomSettingsActivity", "get failed with ", task.getException());
-                            }
-                        }
-                    });
-        }else {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+                        room = document.toObject(Room.class);
+                        // show list of all user names for disabling
+                        setRecyclerViewForUsers();
+                    } else {
+                        Log.d("RoomSettingsActivity", "get failed with ", task.getException());
+                    }
+                }
+            });
+        } else {
             //TODO else what?
         }
     }
@@ -87,15 +74,14 @@ public class RoomSettingsActivity extends TenQActivity {
     }
 
     private void setSettings() {
-        User currentUser = getAuthService().getCurrentUser();
-        if (!currentUser.getId().equals(room.getHost().getId())) { // if the users are not the host then they can't change the settings
+        if (!getAuthService().isCurrentUserHost(room)) { // if the users are not the host then they can't change the settings
             binding.switchSoundsAwareness.setClickable(false);
             binding.switchForeignActions.setClickable(false);
         }
 
         binding.switchSoundsAwareness.setEnabled(soundAwareness.getRecorderService().isDeviceConnected());
         binding.switchSoundsAwareness.setChecked(soundAwareness.getRecorderService().isUserSetRecorderOn());
-        binding.switchForeignActions.setEnabled(currentUser.getId().equals(room.getHost().getId()));
+        binding.switchForeignActions.setEnabled(getAuthService().isCurrentUserHost(room));
         binding.switchForeignActions.setChecked(room.isUserActionsAllowed());
 
         binding.switchSoundsAwareness.setOnCheckedChangeListener((compoundButton, isChecked) -> {
@@ -103,8 +89,7 @@ public class RoomSettingsActivity extends TenQActivity {
             soundAwareness.getRecorderService().setUserSetRecorderOn(isChecked);
             if (isChecked) {
                 soundAwareness.getRecorderService().startRecorder();
-            }
-            else {
+            } else {
                 soundAwareness.getRecorderService().stopRecorder();
             }
             soundAwareness.saveCurrentRecorderState(isChecked);

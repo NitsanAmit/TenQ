@@ -12,6 +12,9 @@ public class Playlist extends SpotifyEntity implements Serializable {
     @SerializedName("href")
     String href;
 
+    @SerializedName("external_urls")
+    ExternalUrls externalUrls;
+
     @SerializedName("owner")
     SpotifyEntity owner;
 
@@ -26,6 +29,10 @@ public class Playlist extends SpotifyEntity implements Serializable {
 
     public Page<Track> getTracks() {
         return tracks;
+    }
+
+    public ExternalUrls getExternalUrls() {
+        return externalUrls;
     }
 }
 

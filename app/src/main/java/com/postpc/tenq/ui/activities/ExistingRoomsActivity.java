@@ -183,7 +183,7 @@ public class ExistingRoomsActivity extends TenQActivity {
 
             @Override
             public void onRoomClose(Room room) {
-                if (!room.getHost().getId().equals(getAuthService().getCurrentUser().getId())) {
+                if (!getAuthService().isCurrentUserHost(room)) {
                     Toast.makeText(ExistingRoomsActivity.this, "Only room host can close room", Toast.LENGTH_SHORT).show();
                 } else {
                     // show alert dialog for closing room

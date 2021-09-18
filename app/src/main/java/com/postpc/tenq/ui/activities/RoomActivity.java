@@ -71,6 +71,9 @@ public class RoomActivity extends TenQActivity {
     private final ActivityResultLauncher<Intent> songActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), this::onSongsSearchResult);
 
+    private final ActivityResultLauncher<Intent> spotifySearchResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), this::onSpotifySearchResult);
+
     private boolean foreignContext = false;
 
     @Override
@@ -246,8 +249,15 @@ public class RoomActivity extends TenQActivity {
 
     private void initRecyclerViewAndLoadPlaylist() {
         if (getSupportActionBar() != null) getSupportActionBar().setTitle(room.getName());
-        binding.fabAddSong.setOnClickListener(v ->
-                songActivityResultLauncher.launch(new Intent(RoomActivity.this, SongSearchActivity.class).putExtra("room", room)));
+        binding.fabAddSong.setOnClickListener(v -> {
+            if (getAuthService().isCurrentUserHost(room)) {
+                songActivityResultLauncher.launch(new Intent(RoomActivity.this, SongSearchActivity.class).putExtra("room", room));
+            } else {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(room.getPlaylist().getExternalUrls().getSpotify()));
+                spotifySearchResultLauncher.launch(intent);
+            }
+        });
         // Set the layout manager
         binding.recyclerTracks.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 
@@ -264,7 +274,7 @@ public class RoomActivity extends TenQActivity {
         binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage));
 
         // Set an ItemTouchHelper for removing tracks from the list with a swipe motion
-        boolean isActionsAllowed = room.isUserActionsAllowed() | getAuthService().getCurrentUser().getId().equals(room.getHost().getId());
+        boolean isActionsAllowed = room.isUserActionsAllowed() | getAuthService().isCurrentUserHost(room);
         trackTouchCallback = new TrackTouchCallback(model, adapter, isActionsAllowed);
         itemTouchHelper = new ItemTouchHelper(trackTouchCallback);
         itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
@@ -307,7 +317,7 @@ public class RoomActivity extends TenQActivity {
      */
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_room_activity, menu);
-        if (!room.getHost().getId().equals(getAuthService().getCurrentUserId())) {
+        if (!getAuthService().isCurrentUserHost(room)) {
             menu.findItem(R.id.settings).setVisible(false);
         }
         return super.onCreateOptionsMenu(menu);
@@ -341,7 +351,7 @@ public class RoomActivity extends TenQActivity {
                 actionsAllowed = intent.getBooleanExtra("actionsAllowed", false);
             }
             room.setUserActionsAllowed(actionsAllowed);
-            trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().getCurrentUser().getId().equals(room.getHost().getId()));
+            trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().isCurrentUserHost(room));
             TracksAdapter adapter = ((TracksAdapter) binding.recyclerTracks.getAdapter());
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
@@ -358,6 +368,11 @@ public class RoomActivity extends TenQActivity {
                 model.reloadList();
             }
         }
+    }
+
+    private void onSpotifySearchResult(androidx.activity.result.ActivityResult result) {
+        RoomActivityViewModel model = new ViewModelProvider(this).get(RoomActivityViewModel.class);
+        model.reloadList();
     }
 
     @Override

@@ -12,6 +12,15 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.models.User;
+import com.postpc.tenq.network.SpotifyClient;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.HashMap;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class JoinActivityViewModel extends ViewModel {
 
@@ -50,20 +59,34 @@ public class JoinActivityViewModel extends ViewModel {
     }
 
     private void addUserToRoom(Room roomToJoin, User user) {
-        FirebaseFirestore instance = FirebaseFirestore.getInstance();
-        DocumentReference userRef = instance.collection("users").document(user.getId());
-        DocumentReference roomRef = instance.collection("rooms").document(roomToJoin.getId());
-        instance
-                .batch()
-                .update(userRef, "roomIds", FieldValue.arrayUnion(roomToJoin.getId()))
-                .update(roomRef, "guests", FieldValue.arrayUnion(user))
-                .commit()
-                .addOnSuccessListener(unused -> joinedRoom.postValue(roomToJoin))
-                .addOnFailureListener(e -> {
-                    error.postValue(new ViewModelError("Error adding user to room, try again later"));
-                    Log.e("JoinLinkActivity", e.getMessage(), e);
+        HashMap<String, Object> bodyDetails = new HashMap<>(1);
+        bodyDetails.put("public", true);
+        SpotifyClient
+                .getClient()
+                .followPlaylist(roomToJoin.getPlaylist().getId(), bodyDetails)
+                .enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                        FirebaseFirestore instance = FirebaseFirestore.getInstance();
+                        DocumentReference userRef = instance.collection("users").document(user.getId());
+                        DocumentReference roomRef = instance.collection("rooms").document(roomToJoin.getId());
+                        instance
+                                .batch()
+                                .update(userRef, "roomIds", FieldValue.arrayUnion(roomToJoin.getId()))
+                                .update(roomRef, "guests", FieldValue.arrayUnion(user))
+                                .commit()
+                                .addOnSuccessListener(unused -> joinedRoom.postValue(roomToJoin))
+                                .addOnFailureListener(e -> {
+                                    error.postValue(new ViewModelError("Error adding user to room, try again later"));
+                                    Log.e("JoinLinkActivity", e.getMessage(), e);
+                                });
+                    }
+
+                    @Override
+                    public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                        Log.e("JoinActivityViewModel", t.getMessage(), t);
+                    }
                 });
     }
-
 }
 
