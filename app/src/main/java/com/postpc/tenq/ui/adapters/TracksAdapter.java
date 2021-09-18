@@ -73,7 +73,7 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
         holder.trackName.setText(trackData.getName());
         holder.trackDescription.setText(getTrackDescription(track));
         if (hasCoverImage(trackData)) {
-            Glide.with(holder.albumCover).load(trackData.getAlbum().getImages()[0].getUrl()).into(holder.albumCover);
+            Glide.with(holder.albumCover).load(trackData.getAlbum().getImages().get(0).getUrl()).into(holder.albumCover);
         } else {
             Glide.with(holder.albumCover).load(R.drawable.ic_music_note).into(holder.albumCover);
         }
@@ -133,6 +133,6 @@ public class TracksAdapter extends ListAdapter<PlaylistTrack, TrackViewHolder> {
     }
 
     private boolean hasCoverImage(Track trackData) {
-        return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().length > 0;
+        return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().size() > 0;
     }
 }

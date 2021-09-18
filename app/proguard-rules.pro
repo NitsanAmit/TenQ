@@ -31,7 +31,19 @@
 
 -keep class com.postpc.tenq.ui.helpers.** { *; }
 
+-keep class com.spotify.protocol.mappers.** { *; }
+-keepnames class com.spotify.protocol.mappers.**
 -keep class com.google.firebase.database.** { *; }
+-keepnames class com.fasterxml.jackson.** { *; }
+-keep class com.fasterxml.jackson.** { *; }
+-keepnames class org.bouncycastle.jsse.** { *; }
+-keep class org.bouncycastle.jsse.** { *; }
+-keepnames class org.conscrypt.** { *; }
+-keep class org.conscrypt.** { *; }
+-keepnames class org.openjsse.javax.net.ssl.** { *; }
+-keep class org.openjsse.javax.net.ssl.** { *; }
+-keepnames class org.openjsse.net.ssl.** { *; }
+-keep class org.openjsse.net.ssl.** { *; }
 
 -keepclassmembers enum * { *; }
 

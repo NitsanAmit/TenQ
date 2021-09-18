@@ -56,7 +56,7 @@ public class SongSearchAdapter extends ListAdapter<Track, SongSearchViewHolder> 
             listener.songAddClicked(track);
         });
         if (hasCoverImage(track)) {
-            Glide.with(holder.albumCover).load(track.getAlbum().getImages()[0].getUrl()).placeholder(R.drawable.ic_music_note).into(holder.albumCover);
+            Glide.with(holder.albumCover).load(track.getAlbum().getImages().get(0).getUrl()).placeholder(R.drawable.ic_music_note).into(holder.albumCover);
         } else {
             Glide.with(holder.albumCover).load(R.drawable.ic_music_note).into(holder.albumCover);
         }
@@ -71,7 +71,7 @@ public class SongSearchAdapter extends ListAdapter<Track, SongSearchViewHolder> 
     }
 
     private boolean hasCoverImage(Track trackData) {
-        return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().length > 0;
+        return trackData.getAlbum() != null && trackData.getAlbum().getImages() != null && trackData.getAlbum().getImages().size() > 0;
     }
 
 }

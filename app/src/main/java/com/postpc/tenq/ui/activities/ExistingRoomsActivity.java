@@ -1,17 +1,13 @@
 package com.postpc.tenq.ui.activities;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.textfield.TextInputEditText;
@@ -27,7 +23,6 @@ import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
 import com.postpc.tenq.ui.adapters.ExistingRoomsAdapter;
 import com.postpc.tenq.ui.listeners.IRoomActionListener;
-import com.postpc.tenq.viewmodels.ViewModelError;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -159,7 +154,7 @@ public class ExistingRoomsActivity extends TenQActivity {
 
     private void initRecyclerViewWithExistingRooms(List<Room> rooms) {
         binding.recyclerExistingRooms.setLayoutManager(new LinearLayoutManager(this));
-        IRoomActionListener actionListener = new IRoomActionListener() { //TODO implement
+        IRoomActionListener actionListener = new IRoomActionListener() {
             @Override
             public void onRoomExport(Room room) {
                 HashMap<String, Object> bodyDetails = new HashMap<>(1);

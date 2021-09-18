@@ -3,22 +3,23 @@ package com.postpc.tenq.models;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Album extends SpotifyEntity implements Serializable {
 
     @SerializedName("artists")
-    Artist[] artists;
+    List<Artist> artists;
 
     @SerializedName("release_date")
     String releaseDate;
 
     @SerializedName("images")
-    SpotifyImage[] images;
+    List<SpotifyImage> images;
 
     @SerializedName("href")
     String href;
 
-    public SpotifyImage[] getImages() {
+    public List<SpotifyImage> getImages() {
         return images;
     }
 }
