@@ -55,6 +55,6 @@ public interface SpotifyApiService {
     Call<Void> unfollowPlaylist(@Path("playlist_id") String playlistId);
 
     @POST("playlists/{playlist_id}/tracks")
-    Call<Void> addTrackToPlaylist(@Path("playlist_id") String playlistId, @Query("uris") String trackUri);
+    Call<Void> addTrackToPlaylist(@Path("playlist_id") String playlistId, @Query("uris") String trackUris);
 
 }

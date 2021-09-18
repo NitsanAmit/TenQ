@@ -101,7 +101,7 @@ public class SongSearchActivityViewModel extends ViewModel {
     public void addTrackToRoomPlaylist(User user, Room room, Track track) {
         SpotifyClient.getClient()
                 .addTrackToPlaylist(room.getPlaylist().getId(), track.getUri())
-                .enqueue(new Callback<Void>() {
+                .enqueue(new Callback<>() {
                     @Override
                     public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                         addedTracks.postValue(true);
