@@ -1,6 +1,5 @@
 package com.postpc.tenq.ui.activities;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -76,13 +75,10 @@ public class RoomSettingsActivity extends TenQActivity {
     private void setSettings() {
         if (!getAuthService().isCurrentUserHost(room)) { // if the users are not the host then they can't change the settings
             binding.switchSoundsAwareness.setClickable(false);
-            binding.switchForeignActions.setClickable(false);
         }
 
         binding.switchSoundsAwareness.setEnabled(soundAwareness.getRecorderService().isDeviceConnected());
         binding.switchSoundsAwareness.setChecked(soundAwareness.getRecorderService().isUserSetRecorderOn());
-        binding.switchForeignActions.setEnabled(getAuthService().isCurrentUserHost(room));
-        binding.switchForeignActions.setChecked(room.isUserActionsAllowed());
 
         binding.switchSoundsAwareness.setOnCheckedChangeListener((compoundButton, isChecked) -> {
 
@@ -93,15 +89,6 @@ public class RoomSettingsActivity extends TenQActivity {
                 soundAwareness.getRecorderService().stopRecorder();
             }
             soundAwareness.saveCurrentRecorderState(isChecked);
-        });
-
-        binding.switchForeignActions.setOnCheckedChangeListener((compoundButton, isChecked) ->
-        {
-            setResult(Activity.RESULT_OK, getIntent().putExtra("actionsAllowed", isChecked));
-            FirebaseFirestore.getInstance()
-                    .collection("rooms")
-                    .document(room.getId())
-                    .update("userActionsAllowed", isChecked);
         });
     }
 

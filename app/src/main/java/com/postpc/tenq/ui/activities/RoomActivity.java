@@ -284,7 +284,7 @@ public class RoomActivity extends TenQActivity {
         binding.recyclerTracks.addOnScrollListener(new PagingScrollListener(model::loadNextPage));
 
         // Set an ItemTouchHelper for removing tracks from the list with a swipe motion
-        boolean isActionsAllowed = room.isUserActionsAllowed() | getAuthService().isCurrentUserHost(room);
+        boolean isActionsAllowed = getAuthService().isCurrentUserHost(room);
         trackTouchCallback = new TrackTouchCallback(model, adapter, isActionsAllowed);
         itemTouchHelper = new ItemTouchHelper(trackTouchCallback);
         itemTouchHelper.attachToRecyclerView(binding.recyclerTracks);
@@ -355,13 +355,7 @@ public class RoomActivity extends TenQActivity {
 
     private void onSettingsResult(androidx.activity.result.ActivityResult result) {
         if (result.getResultCode() == Activity.RESULT_OK) {
-            Intent intent = result.getData();
-            boolean actionsAllowed = room.isUserActionsAllowed();
-            if (intent != null) {
-                actionsAllowed = intent.getBooleanExtra("actionsAllowed", false);
-            }
-            room.setUserActionsAllowed(actionsAllowed);
-            trackTouchCallback.setIsActionsAllowed(actionsAllowed | getAuthService().isCurrentUserHost(room));
+            trackTouchCallback.setIsActionsAllowed(getAuthService().isCurrentUserHost(room));
             TracksAdapter adapter = ((TracksAdapter) binding.recyclerTracks.getAdapter());
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
