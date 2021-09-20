@@ -17,9 +17,8 @@ public class SpotifyClient {
     public static final String CLIENT_ID = "0257114a4a0141bc9587d0538dda962f";
     public static final String REDIRECT_URI = "compostpctenq://spotifycallback";
     public static final String[] AUTHORIZATION_SCOPES = {
-            "user-read-email", "user-top-read", "user-modify-playback-state",
-            "playlist-modify-public", "playlist-modify-private", "user-library-read",
-            "user-library-modify"
+            "user-read-email", "playlist-modify-public", "playlist-modify-private",
+            "user-library-read", "user-library-modify"
     };
     private static final String SPOTIFY_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 

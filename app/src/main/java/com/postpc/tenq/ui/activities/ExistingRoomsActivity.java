@@ -8,19 +8,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
 import com.postpc.tenq.core.TenQActivity;
 import com.postpc.tenq.databinding.ActivityExistingRoomsBinding;
-import com.postpc.tenq.models.Page;
 import com.postpc.tenq.models.Playlist;
-import com.postpc.tenq.models.PlaylistTrack;
 import com.postpc.tenq.models.Room;
 import com.postpc.tenq.models.User;
 import com.postpc.tenq.network.SpotifyClient;
@@ -34,8 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -140,6 +134,7 @@ public class ExistingRoomsActivity extends TenQActivity {
                     if (roomIds == null || roomIds.size() == 0) {
                         initRecyclerViewWithExistingRooms(new ArrayList<>());
                     } else {
+                        binding.fabCreateRoom.setEnabled(roomIds.size() < 10);
                         getRoomsDetails(roomIds);
                     }
                 });
@@ -239,6 +234,10 @@ public class ExistingRoomsActivity extends TenQActivity {
                         } else {
                             removeUserFromRoom(room, user);
                         }
+                        FirebaseFirestore.getInstance()
+                                .collection("users")
+                                .document(user.getId())
+                                .update("roomIds", FieldValue.arrayRemove(room.getId()));
                     }
 
                     @Override
@@ -249,14 +248,10 @@ public class ExistingRoomsActivity extends TenQActivity {
     }
 
     private void removeUserFromRoom(Room roomToDelete, User user) {
-        FirebaseFirestore instance = FirebaseFirestore.getInstance();
-        DocumentReference userRef = instance.collection("users").document(user.getId());
-        DocumentReference roomRef = instance.collection("rooms").document(roomToDelete.getId());
-        instance
-                .batch()
-                .update(userRef, "roomIds", FieldValue.arrayRemove(roomToDelete.getId()))
-                .update(roomRef, "guests", FieldValue.arrayRemove(user))
-                .commit()
+        FirebaseFirestore.getInstance()
+                .collection("rooms")
+                .document(roomToDelete.getId())
+                .update("guests", FieldValue.arrayRemove(user))
                 .addOnFailureListener(e -> {
                     Toast.makeText(ExistingRoomsActivity.this, "Error deleting user from room, try again later", Toast.LENGTH_SHORT).show();
                     Log.e("ExistingRoomsActivity", e.getMessage(), e);
