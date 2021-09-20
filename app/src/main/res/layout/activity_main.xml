@@ -15,7 +15,7 @@
         android:layout_height="120dp"
         android:maxWidth="100dp"
         android:maxHeight="100dp"
-        android:src="@drawable/app_logo"
+        android:src="@drawable/logo"
         android:contentDescription="@string/aria_logo"
         android:layout_marginTop="32dp"
         />
