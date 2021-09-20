@@ -94,6 +94,7 @@ public class PlayerService implements IPlayerService {
         this.spotifyAppRemote
                 .getPlayerApi()
                 .play(uri)
+                .setResultCallback(callback -> this.spotifyAppRemote.getPlayerApi().setShuffle(false))
                 .setErrorCallback(t -> onPlayerError.onError(new PlayerError(PlayerErrorType.PLAYBACK_ERROR, t)));
     }
 
@@ -102,6 +103,7 @@ public class PlayerService implements IPlayerService {
         this.spotifyAppRemote
                 .getPlayerApi()
                 .resume()
+                .setResultCallback(callback -> this.spotifyAppRemote.getPlayerApi().setShuffle(false))
                 .setErrorCallback(t -> onPlayerError.onError(new PlayerError(PlayerErrorType.PLAYBACK_ERROR, t)));
     }
 
@@ -142,6 +144,7 @@ public class PlayerService implements IPlayerService {
         this.spotifyAppRemote
                 .getPlayerApi()
                 .skipToIndex(playlistUri, index)
+                .setResultCallback(callback -> this.spotifyAppRemote.getPlayerApi().setShuffle(false))
                 .setErrorCallback(t -> onPlayerError.onError(new PlayerError(PlayerErrorType.PLAYBACK_ERROR, t)));
     }
 }
