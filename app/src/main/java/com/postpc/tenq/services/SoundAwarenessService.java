@@ -10,12 +10,10 @@ public class SoundAwarenessService {
     private static final String RECORD_SERVICE_PREFS = "record_service_prefs";
     private static final String RECORDER_KEY = "recorder";
     private final Context applicationContext;
-    private final Gson gson;
     private final RecorderService recorderService;
 
     public SoundAwarenessService(Context applicationContext, RecorderService recorderService) {
         this.applicationContext = applicationContext;
-        this.gson = new Gson();
         this.recorderService = recorderService;
         this.recorderService.setUserSetRecorderOn(getRecorderStateFromSharedPreferences());
     }

@@ -14,7 +14,6 @@ public class Room implements Serializable {
     private User host;
     private List<User> guests;
     private Playlist playlist;
-    private boolean userActionsAllowed;
 
     public Room() {
 
@@ -30,7 +29,6 @@ public class Room implements Serializable {
         this.creationTime = new Date().getTime();
         this.active = true;
         this.guests = new ArrayList<>();
-        this.userActionsAllowed = true;
     }
 
     public String getId() {
@@ -69,11 +67,4 @@ public class Room implements Serializable {
         this.playlist = playlist;
     }
 
-    public boolean isUserActionsAllowed() {
-        return userActionsAllowed;
-    }
-
-    public void setUserActionsAllowed(boolean userActionsAllowed) {
-        this.userActionsAllowed = userActionsAllowed;
-    }
 }
