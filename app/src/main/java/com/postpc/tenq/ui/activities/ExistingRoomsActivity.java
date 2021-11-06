@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.postpc.tenq.R;
@@ -37,12 +38,15 @@ import retrofit2.Response;
 
 public class ExistingRoomsActivity extends TenQActivity {
     private ActivityExistingRoomsBinding binding;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityExistingRoomsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         //TODO move all the firebase logic to a viewmodel
         getUserExistingRooms();
 
@@ -68,6 +72,7 @@ public class ExistingRoomsActivity extends TenQActivity {
     }
 
     private void createNewRoom(String roomName) {
+        mFirebaseAnalytics.logEvent("create_room_clicked", null);
         User currentUser = getAuthService().getCurrentUser();
         Map<String, Object> playlistDetails = new HashMap<>(4);
         playlistDetails.put("name", "TenQ - " + roomName);
@@ -78,6 +83,7 @@ public class ExistingRoomsActivity extends TenQActivity {
             @Override
             public void onResponse(Call<Playlist> call, Response<Playlist> response) {
                 if (response.isSuccessful()) {
+                    mFirebaseAnalytics.logEvent("create_room_playlist_created", null);
                     Room newRoom = new Room(roomName, currentUser);
                     newRoom.setPlaylist(response.body());
                     saveRoomInFirestore(newRoom);
@@ -88,6 +94,7 @@ public class ExistingRoomsActivity extends TenQActivity {
 
             @Override
             public void onFailure(Call<Playlist> call, Throwable t) {
+                mFirebaseAnalytics.logEvent("create_room_playlist_creation_failed", null);
                 Log.e("RoomActivity", "Can't create room", t);
                 Toast.makeText(ExistingRoomsActivity.this, "Error creating room - try again later", Toast.LENGTH_SHORT).show();
             }
@@ -100,6 +107,11 @@ public class ExistingRoomsActivity extends TenQActivity {
                 .collection("rooms")
                 .add(newRoom)
                 .addOnSuccessListener(documentReference -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("room_id", newRoom.getId());
+                    bundle.putString("room_name", newRoom.getName());
+                    bundle.putString("room_host_id", newRoom.getHost().getId());
+                    mFirebaseAnalytics.logEvent("create_room_saved_in_firestore", bundle);
                     String roomId = documentReference.getId();
                     newRoom.setId(roomId);
                     documentReference.update("id", roomId);
@@ -110,6 +122,9 @@ public class ExistingRoomsActivity extends TenQActivity {
                 })
                 .addOnFailureListener(e -> {
                     Log.e("RoomActivity", "Can't create room", e);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("error", e.getMessage());
+                    mFirebaseAnalytics.logEvent("create_room_in_firestore_failed", bundle);
                     Toast.makeText(ExistingRoomsActivity.this, "Error creating room - try again later", Toast.LENGTH_SHORT).show();
                 });
     }

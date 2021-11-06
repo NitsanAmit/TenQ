@@ -3,9 +3,12 @@ package com.postpc.tenq.ui.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.postpc.tenq.R;
@@ -33,6 +36,7 @@ import androidx.annotation.NonNull;
 public class MainActivity extends TenQActivity {
 
     private static final int REQUEST_CODE = 1337;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +45,11 @@ public class MainActivity extends TenQActivity {
         final ProgressBarAnimation anim = new ProgressBarAnimation(findViewById(R.id.progress_main_activity));
         anim.setDuration(3500);
         runOnUiThread(() -> findViewById(R.id.progress_main_activity).startAnimation(anim));
-
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        Bundle bundle = new Bundle();
+        bundle.putString("phone_model", android.os.Build.MODEL);
+        bundle.putString("phone_user", Build.USER);
+        mFirebaseAnalytics.logEvent("open_app", bundle);
         startSpotifyAuthFlow();
 
     }
@@ -71,20 +79,35 @@ public class MainActivity extends TenQActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("spotify_auth_return_result", resultCode);
         super.onActivityResult(requestCode, resultCode, data);
         final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, data);
         if (response.getError() != null && !response.getError().isEmpty()) {
             Log.e("LoginActivity", response.getError());
+            bundle.putString("spotify_auth_error", response.getError());
+            mFirebaseAnalytics.logEvent("spotify_auth_return", bundle);
             return;
         }
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             String token = response.getAccessToken();
+            if (token == null) {
+                mFirebaseAnalytics.logEvent("spotify_auth_cancel", bundle);
+                Toast.makeText(MainActivity.this, "Please authenticate with Spotify", Toast.LENGTH_SHORT).show();
+                startSpotifyAuthFlow();
+                return;
+            }
+            bundle.putString("spotify_auth_token", token);
             SpotifyClient.init(token);
             if (getAuthService().getCurrentUser() == null) {
+                bundle.putString("spotify_auth_user", null);
                 getUserProfile();
             } else {
+                bundle.putString("spotify_auth_user", getAuthService().getCurrentUserId());
+                registerUser();
                 startRoomsActivity();
             }
+            mFirebaseAnalytics.logEvent("spotify_auth_success", bundle);
         }
     }
 
